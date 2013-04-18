@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <title>Jacket</title>
+      <link rel="stylesheet" type="text/css" href="stylesheets/vendor/mocha.css" />
+  </head>
+  <body>
+
+    <div id="mocha"></div>
+
+    <script type="text/javascript" src="javascripts/vendor/jquery.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/mocha.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/mockjax.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/chai.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/sinon-chai.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/sinon.js"></script>
+
+    <script type="text/javascript" src="javascripts/vendor/underscore.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/backbone.js"></script>
+
+
+    <script>
+        mocha.setup({
+            ui: 'bdd',
+            globals: ['_', '$', 'jQuery*', 'Backbone', 'JST', 'LiveReload']
+        });
+        chai.should();
+    </script>
+
+    <script type="text/javascript" src="jacket.js"></script>
+    <script type="text/javascript" src="/tests/helpers.js"></script>
+
+    <script type="text/javascript" src="/tests/specs/common.spec.js"></script>
+    
+    <!-- TEST COFFEE CLASSES -->
+    <script type="text/javascript" src="/tests/classes/coffee.class.js"></script>
+    <script type="text/javascript" src="/tests/specs/coffee.spec.js"></script>
+
+    <!-- TEST BACKBONE.extening -->
+    <script type="text/javascript" src="/tests/classes/backbone.class.js"></script>
+    <script type="text/javascript" src="/tests/specs/backbone.spec.js"></script>
+
+    <script type="text/javascript" src="/tests/specs/require.spec.js"></script>
+    <script type="text/javascript" src="/tests/specs/angular.spec.js"></script>
+    <script type="text/javascript" src="/tests/specs/chaplin.spec.js"></script>
+    <script type="text/javascript" src="/tests/specs/ember.spec.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            mocha.run();
+        });
+    </script>
+
+  </body>
+</html>
