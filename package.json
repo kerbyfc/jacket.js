@@ -1,0 +1,12 @@
+{
+  "name": "Band",
+  "version": "1.0.1",
+  "private": true,
+  "scripts": {
+    "test": "open http://localhost:8080 && node server.js"
+  },
+  "dependencies": {
+    "connect": "2.7.6",
+    "connect-route": "0.1.3"
+  }
+}
