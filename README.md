@@ -1,7 +1,7 @@
 Jacket.js
 =========
 
-  ***dress up your classes, function and object to Jackets***
+  ***dress up your classes, functions and objects to Jacket***
 
 How much we need the callstack when an error occurs at the front? I want it badly... I want avoid of missing notifications about front-end exceptions in production!
 I dont want to wrap each method of my classes in try/catch to handle stacktrace, I want to wrap whole class and rid myself from this boring work.
@@ -64,46 +64,90 @@ Jacket.js is able to wrap classes, functions and objects. After exception handli
 ##### Function's wrapping
 ```javascript
 namespace.sum = function sum(a, b) {
-  if (b == null) b = _undefined /* this will raise an exception */
+  if (b == null) b = _undefined; /* this will raise an exception */
   this.result = a + b;
   return this.result;
 
 }
 
-J(namespace.sum)(1, 1)         // 2
-new J(namespace.sum)(1, 1)     // Object {result: 2}
+J(namespace.sum)(1, 1);         // 2
+new J(namespace.sum)(1, 1);     // Object {result: 2}
 
-J(namespace.sum)('oops!')      // sum constructor: _undefined is not defined
-                               //  - at http://localhost:8080/:68:25
+J(namespace.sum)('oops!');      // sum constructor : _undefined is not defined
+                                //  - at http://localhost:8080/:68:25
                                
-console.log('I`m here');       /* will not be executed, because exception will be raised */    
+console.log('I`m here');        /* will not be executed, because exception will be raised */    
 ```
 Lets play with anonymous functions
 ```javascript
 var anonymous = function(msg) {
-  if (!arguments.length) arguments = _undefined
+  if (!arguments.length) arguments = _undefined;
   console.log(msg);
 }
 
-J(anonymous)()   // .anonymous4 error: _undefined is not defined
-                 //  - at anonymous (http://localhost:8080/:75:46)
-                 //  - at wrapper (http://localhost:8080/jacket.js:452:50)
-                 //  - at http://localhost:8080/:78:21
-                 // Object {
-                 //   0: Object {
-                 //       args: Arguments[0]
-                 //       method: "anonymous4"
-                 //       scope: ""
-                 //       time: 1366372456227
-                 //     }
-                 // }
-                 //
+J(anonymous)();
+// anonymous4.constructor : _undefined is not defined
+//  - at anonymous (http://localhost:8080/:77:46)
+//  - at wrapper (http://localhost:8080/jacket.js:470:50)
+//  - at http://localhost:8080/:80:21
+```
+As you can see, error message was modified and anonymous function was presented as "anonymous4". We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
+```javascript
+var named = J('NamedFunction', anonymous);
 
+/* NOW NAMED IS */
+function NamedFunction(msg) {
+    
+    try { 
+      
+      // directly our code
+      if (!arguments.length) arguments = _undefined;
+      console.log(msg);
+         
+    } catch (e) { 
+      // to help us find bugs faster
+      e.message = ( _wrapper.origin.name + " constructor : " + e.message); Jacket.handle(e);  
+    }
+ 
+    // oh-ho-how... Can we wrap functions` own methods, created in constructor? That's it. 
+    var _self = this; _.each(this, function (val, key) {
+      _self[key] = _wrapper.wrap(key, val);
+    });
 
+}
 
+named();
+// NamedFunction constructor : _undefined is not defined
+//  - at http://localhost:8080/:84:9
 ```
 
+##### Classes wrapping
+Classes represent a more complex structure than functions. They usually have suite of prototype's methods, instance methods and sometimes static methods. All methods of class are supposed to be wrapped. Instance methods, which were created in constructor supposed to be wrapped after constructor's code execution. If there are callings of these methods inside the constructor and one of them contains mistakes, exception should be catched inside constructor.
 
+```javascript
+var _Class = (function _Class() {
+  function _Class(wishes) {
+    this.defInConst = function() {
+      return _undefined; 
+    }
+    if (wishes)
+      this.defInConst(); 
+  }
+  return _Class;
+}).call(window);
+
+console.log(_Class.defInConst); // undefined
+
+new J(_Class)().defInConst()
+// _Class.defInConst : _undefined is not defined
+//  - at _Class.wrapper [as defInConst] (http://localhost:8080/jacket.js:478:50)
+//  - at http://localhost:8080/:95:25 
+
+new J(_Class)('call defInConst inside constructor')
+// _Class constructor : _undefined is not defined
+//  - at http://localhost:8080/jacket.js:281:48
+//  - at http://localhost:8080/:96:22 
+```
 
 
 
