@@ -1,38 +1,61 @@
-describe 'Common Jacket implementation', -> 
+describe 'Pure javascript', -> 
 
-  obj = 
+  object = 
     method: -> 
       'method'
     prop: 'prop'
 
-  anonymous = -> 
-    false
+  anonymous = -> 'anonymous'
 
-  describe 'Jacket ( Object )', -> 
+  `var named = function named() {return false;}`
 
-    beforeEach -> 
-      @w = J(obj)
+  for obj in [object, anonymous, named] 
 
-    it 'should return new object', -> 
-      @w.should.not.eq obj
-      @w.should.be.instanceOf Object
+    obj.method = -> 'method'
+    obj.prop = 'prop'
 
-    it 'should copy origin object property', -> 
-      @w.should.have.ownProperty 'prop'
-      @w.prop.should.equal obj.prop
-      @w.prop = false
-      obj.prop.should.be.ok
+    name = ( if typeof obj is 'function' and obj.name is '' then 'anonymous ' else '' ) + ' ' + obj.constructor.name
 
-    it 'should wrap origin object methods', -> 
-      @w.should.have.ownProperty 'method'
-      @w.method.toString().should.not.eq obj.method.toString()
-      @w.method.should.match Helpers.wrapped_function
+    describe 'Jacket ( ' + name + ' )', -> 
 
-  describe 'Jacket ( \'MyFunc\', function ) ', -> 
+      beforeEach -> 
+        @w = J(obj)
 
-    it 'should give the name to anonymous function', -> 
+      it 'should return new object', -> 
+        @w.should.not.eq obj
+        @w.should.be.instanceOf Object
 
-      @w = J('Myfunc', anonymous)
-      console.log "NAME", @w.name
+      describe 'should have', ->
 
+        it 'copies of origin object properties', -> 
+          @w.should.have.ownProperty 'prop'
+          @w.prop.should.equal obj.prop
+          @w.prop = false
+          obj.prop.should.be.ok
+
+        it 'wrapped origin object methods', -> 
+          @w.should.have.ownProperty 'method'
+          @w.method.toString().should.not.eq obj.method.toString()
+          @w.method.should.match Helpers.wrapped_function
+
+      # describe 'Jacket ( Anonymous function ) ', -> 
+
+      #   before -> 
+      #     @anonymous = Jacket(anonymous)
+
+      #   it 'should return wrapped function', -> 
+      #     @anonymous.should.match Helpers.wrapped_function
+
+      #   describe 'should have', -> 
+
+      #     it 'copies of origin object properties', -> 
+      #       @w.should.have.ownProperty 'prop'
+      #       @w.prop.should.equal obj.prop
+      #       @w.prop = false
+      #       obj.prop.should.be.ok
+
+      #     it 'wrapped origin object methods', -> 
+      #       @w.should.have.ownProperty 'method'
+      #       @w.method.toString().should.not.eq obj.method.toString()
+      #       @w.method.should.match Helpers.wrapped_function
 

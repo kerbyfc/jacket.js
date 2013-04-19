@@ -1,8 +1,25 @@
-describe 'CoffeeScript Jacket implementation', -> 
+describe 'CoffeeScript classes', -> 
+
+  test = new J(ExtendedCoffeeClass)(1)
+  test2 = new J( -> console.log arguments )(1)
+  test3 = new J( {lol:3} )(1)
+
+  test4 = J(ExtendedCoffeeClass)(1)
+  test5 = new J( -> console.log arguments )(1)
+  test6 = J( {lol:3} )
+
+
+  console.log ":", test
+  console.log ":", test2
+  console.log ":", test3
+
+  console.log ":", test4
+  console.log ":", test5
+  console.log ":", test6
 
   for _class, i in [CoffeeClass, ExtendedCoffeeClass]
 
-    beforeEach ->
+    before ->
       @W = Jacket(_class)
 
     describe 'Jacket ( ' + _class.name + ' )', -> 
@@ -24,7 +41,7 @@ describe 'CoffeeScript Jacket implementation', ->
             if typeof val is 'function'
               @W[prop].toString().should.match Helpers.wrapped_function
       
-    describe 'new Jacket ( ' + _class.name + ' )', -> 
+    describe 'new Jacket ( ' + _class.name + ' )( )', -> 
 
       it 'should return new instance of wrapped class', -> 
         w = new @W()

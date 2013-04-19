@@ -1,6 +1,6 @@
-describe 'Backbone.js Jacket implementation', -> 
+describe 'Backbone.View.extend', -> 
 
-  beforeEach ->
+  before ->
     @W = Jacket(BackboneView)
 
   describe 'Jacket ( BackboneView )', -> 

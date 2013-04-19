@@ -2,13 +2,33 @@
 (function() {
   var __hasProp = {}.hasOwnProperty;
 
-  describe('CoffeeScript Jacket implementation', function() {
-    var i, _class, _i, _len, _ref, _results;
+  describe('CoffeeScript classes', function() {
+    var i, test, test2, test3, test4, test5, test6, _class, _i, _len, _ref, _results;
+    test = new J(ExtendedCoffeeClass)(1);
+    test2 = new J(function() {
+      return console.log(arguments);
+    })(1);
+    test3 = new J({
+      lol: 3
+    })(1);
+    test4 = J(ExtendedCoffeeClass)(1);
+    test5 = new J(function() {
+      return console.log(arguments);
+    })(1);
+    test6 = J({
+      lol: 3
+    });
+    console.log(":", test);
+    console.log(":", test2);
+    console.log(":", test3);
+    console.log(":", test4);
+    console.log(":", test5);
+    console.log(":", test6);
     _ref = [CoffeeClass, ExtendedCoffeeClass];
     _results = [];
     for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
       _class = _ref[i];
-      beforeEach(function() {
+      before(function() {
         return this.W = Jacket(_class);
       });
       describe('Jacket ( ' + _class.name + ' )', function() {
@@ -45,7 +65,7 @@
           });
         });
       });
-      _results.push(describe('new Jacket ( ' + _class.name + ' )', function() {
+      _results.push(describe('new Jacket ( ' + _class.name + ' )( )', function() {
         it('should return new instance of wrapped class', function() {
           var w;
           w = new this.W();
