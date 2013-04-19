@@ -51,34 +51,33 @@ namespace.fn = Jacket(function () {
 ```
  
 #### What functionality does it provide in case of error handling?
- - It launches browser' debugger if Jacket.config.use_debugger is positive
+ - It launches browser' debugger if <i>Jacket.config.use_debugger</i> is positive
  - It outputs error message, stacktrace and callstack to console *
- - It pushes these data to specified url if Jacket.config.notify_url is valid url string
+ - It pushes these data to specified url if <i>Jacket.config.notify_url</i> is valid url string
  - It calls your own handler, passing all needed information about an error
+ - It can prevent script execution stopping
  
-\* depends on Jacket.config.log_errors, Jacket.config.log_stacktrace and Jacket.config.log_callstack respectively
+\* depends on <i>Jacket.config.log_errors</i>, <i>Jacket.config.log_stacktrace</i> and <i>Jacket.config.log_callstack</i> respectively
 
 #### Which type of objects can we wrap?
-Jacket.js is able to wrap classes, functions and objects. Lets write an error handler for illustrative purposes.
+Jacket.js is able to wrap classes, functions and objects. After exception handling, it will be thrown on and the script execution will be stopped by default. Setup negative <i>Jacket.config.throw_errors</i> value to avoid script execution stopping. You'll see "I`m here" in your console.
 
 ##### Function's wrapping
 ```javascript
-  namespace.sum = function sum(a, b) {
-    if (b == null)
-      b = _undefined         /* this will raise an exception */
-    this.result = a + b;
-    return this.result;
-  }
-  
-  J(namespace.sum)(1, 1)     // 2
-  new J(namespace.sum)(1, 1) // Object {result: 2}
-  
-  J(namespace.sum)('oops!')  // sum constructor: _undefined is not defined
-                             // - at http://localhost:8080/:68:25
-                             
-  console.log('I`m here');   /* will not be executed, because exception will be raised */                        
+namespace.sum = function sum(a, b) {
+  if (b == null) b = _undefined /* this will raise an exception */
+  this.result = a + b;
+  return this.result;
+}
+
+J(namespace.sum)(1, 1)         // 2
+new J(namespace.sum)(1, 1)     // Object {result: 2}
+
+J(namespace.sum)('oops!')      // sum constructor: _undefined is not defined
+                               // - at http://localhost:8080/:68:25
+                               
+console.log('I`m here');       /* will not be executed, because exception will be raised */    
 ```
-After exception handling, it will be thrown on and the script execution will be stopped by default. Setup negative Jacket.config.throw_errors value to avoid script execution stopping. You'll see "I`m here" in your console.
 
 
 
@@ -102,7 +101,7 @@ After exception handling, it will be thrown on and the script execution will be 
 3. Calling a specific callback on each wrapped function call
 4. ... (I have no time, I'll continue later)
 5. 
-
+Lets write an error handler for illustrative purposes. 
 ```javascript
 J.handler = function(err, msg, trace, stack) {
   
