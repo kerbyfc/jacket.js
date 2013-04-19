@@ -38,10 +38,6 @@ in this case you have a one function call, that supposed to be handled. In case 
 ##### Jacket.js makes it real!
 
 ```javascript
-/* create additional handler */
-Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
-  
-}
 /* just dress it up :) */
 var fn = Jacket(function () {
   return _undefined + true;
@@ -149,27 +145,25 @@ new J(_Class)('call defInConst inside constructor')
 //  - at http://localhost:8080/:96:22 
 ```
 
+#### Additional handler
+```javascript
+/* create additional handler */
+Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
+  /* your code */
+}
+```
 
+#### What functionality does it give? TODO
 
-
-
-
-
-#### -------------------------------------------------------
-#### What functionality does it give?
-
-##### 1. Handling exceptions, raised in function or in public methods of function instance (class)
- 
-   
-
-
+1. Handling exceptions, raised in function or in public methods of function instance (class)
 2. Notify your server about exceptions
 3. Calling a specific callback on each wrapped function call
-4. ... (I have no time, I'll continue later)
-5. 
-Lets write an error handler for illustrative purposes. 
+
 ```javascript
-J.handler = function(err, msg, trace, stack) {
-  
-}
+J(function(){return false}, function(scope, name, method, args, result) {
+  /* it's usefull to implement Backbone.Events for example */
+  console.log(arguments);
+})(); 
+/* WILL OUTPUT TO CONSOLE */
+
 ```
