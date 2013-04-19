@@ -11,25 +11,23 @@ Suppose you have a function, that throws an exception:
 ```javascript
 (function() {
   /* application namespace */
-  var namespace = {
-    fn: function () {
-      return _undefined + true;
-    }
+  var fn = function () {
+    return _undefined + true;
   }
-  namespace.fn();
+  fn();
 }).call(window);
 ```
 
 to get exception stacktrace you might to handle it with specified handler: 
 ```javascript
-namespace.handler = function(err) {
+var handler = function(err) {
   /* notify your server about this error */
 }
-namespace.fn = function () {
+var fn = function () {
   try {
     return _undefined + true;
   } catch (e) {
-    namespace.handler(e); 
+    handler(e);
   }
 }
 ```
@@ -40,11 +38,12 @@ in this case you have a one function call, that supposed to be handled. In case 
 ##### Jacket.js makes it real!
 
 ```javascript
+/* create additional handler */
 Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
-  /* your own handler implementation */
+  
 }
 /* just dress it up :) */
-namespace.fn = Jacket(function () {
+var fn = Jacket(function () {
   return _undefined + true;
 });
 /* then I'll use J instead of Jacket for convenience */
@@ -68,18 +67,41 @@ namespace.sum = function sum(a, b) {
   if (b == null) b = _undefined /* this will raise an exception */
   this.result = a + b;
   return this.result;
+
 }
 
 J(namespace.sum)(1, 1)         // 2
 new J(namespace.sum)(1, 1)     // Object {result: 2}
 
 J(namespace.sum)('oops!')      // sum constructor: _undefined is not defined
-                               // - at http://localhost:8080/:68:25
+                               //  - at http://localhost:8080/:68:25
                                
 console.log('I`m here');       /* will not be executed, because exception will be raised */    
 ```
+Lets play with anonymous functions
+```javascript
+var anonymous = function(msg) {
+  if (!arguments.length) arguments = _undefined
+  console.log(msg);
+}
+
+J(anonymous)()   // .anonymous4 error: _undefined is not defined
+                 //  - at anonymous (http://localhost:8080/:75:46)
+                 //  - at wrapper (http://localhost:8080/jacket.js:452:50)
+                 //  - at http://localhost:8080/:78:21
+                 // Object {
+                 //   0: Object {
+                 //       args: Arguments[0]
+                 //       method: "anonymous4"
+                 //       scope: ""
+                 //       time: 1366372456227
+                 //     }
+                 // }
+                 //
 
 
+
+```
 
 
 
