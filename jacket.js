@@ -278,8 +278,8 @@
 
       if (this instanceof Jacket) {
         return function() {
-          return (typeof obj === 'function') ? new obj(arguments) : obj
-        }
+          return (typeof obj === 'function') ? new obj(arguments) : obj;
+        };
       }
       
       return obj;
@@ -304,7 +304,11 @@
 
         this.origin = origin;
       
+        console.log("FNAME", fname);
+
         this.fname = fname.length ? fname : (origin.name || '');
+
+        console.log("FNAME_", this.fname);
 
         this.wrap = this.bind(this.wrap, this);
 
@@ -313,7 +317,12 @@
       
         if (type === 'function') {
 
-          if (this.fname.length && this.fname.toLowerCase() !== 'anonymous') {
+          if (!this.fname.length) {
+            this.fname = _.uniqueId('anonymous');
+          }
+
+          if (this.fname.match(/^anonymous/i) === null) {
+            console.log("CLAAS");
             this.wrap_class();
           } else {
             this.wrap_object_or_function(this.fname);
@@ -341,7 +350,8 @@
 
       if (typeof name === 'string') {
 
-        this.wrapper = this.wrap(this.fname, this.origin);
+        console.log(_this.fname);
+        this.wrapper = this.wrap('constructor', this.origin, true);
 
         this.wrapper.prototype = this.origin.prototype;
 
@@ -373,12 +383,14 @@
 
     Wearer.prototype.wrap_class = function() {
       
-      var __self__ = this, id = _.uniqueId(this.fname),
+      var _wrapper = this, id = _.uniqueId(this.fname),
         fn = this.parse_function(this.origin.toString());
 
-      Jacket.Wearer.members[id] = {scope: __self__, origin: this.origin};
+      console.log("FNMAE___", this.fname);
+
+      Jacket.Wearer.members[id] = {scope: _wrapper, origin: this.origin};
       
-      globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, __self__) {\n  \n  __self__.extend(" + this.fname + ", _super, __self__);\n  \n  " + this.fname + ".name = \"" + this.fname + "\";\n  \n  function " + this.fname + "(" + (fn[1].join(", ")) + ") {\n    \n    " + fn[0] + "\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = __self__.wrap(key, val);\n    });\n\n  }\n\n  return " + this.fname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");
+      globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, _wrapper) {\n  \n  _wrapper.extend(" + this.fname + ", _super, _wrapper);\n  \n  " + this.fname + ".name = \"" + this.fname + "\";\n  \n  function " + this.fname + "(" + (fn[1].join(", ")) + ") {\n    \n    " + fn[0] + "\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = _wrapper.wrap(key, val);\n    });\n\n  }\n\n  return " + this.fname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");
 
       this.wrapper = Wearer.members[id].wrapper;
 
@@ -386,17 +398,17 @@
 
       _.each(Object.getPrototypeOf(this.wrapper.prototype), function(val, key, proto) {
         if (_.has(proto, key)) {
-          __self__.wrapper.prototype[key] = __self__.wrap(key, val);
+          _wrapper.wrapper.prototype[key] = _wrapper.wrap(key, val);
         }
       });
 
     };
 
     Wearer.prototype.protect = function(protected_methods) {
-      var __self__ = this;
+      var _this = this;
       this.protected_methods = {"__super__": 1, "constructor": 1};
       _.each(protected_methods, function(prop) {
-        __self__.protected_methods[prop] = 1;
+        _this.protected_methods[prop] = 1;
       });
       return this.protected_methods;
     };
@@ -431,7 +443,7 @@
         result.unshift(matches[2].replace(/\{n\}/g, "\n"));
       }
       if (result.length > 0) {
-        result[0] = "try { " + result[0] + (" \n    } catch (e) { \n      e.message = (\"" + this.origin.name + " constructor: \" + e.message); Jacket.handle(e); \n    }");
+        result[0] = "try { " + result[0] + (" \n    } catch (e) { \n      e.message = ( _wrapper.origin.name + \" constructor : \" + e.message); Jacket.handle(e); \n    }");
       }
       result = [result[0], result.slice(1) || []];
       
@@ -440,7 +452,7 @@
     };
 
 
-    Wearer.prototype.wrap = function(prop, value) {
+    Wearer.prototype.wrap = function(prop, value, force) {
       
       var _this = this;
 
@@ -451,7 +463,7 @@
 
       console.log('wrap', typeof this.origin, _this.fname + '.' + prop, '[', typeof value, ']');
 
-      if (typeof value === 'function' && !_.has(value, "wrapped") && !_.has(this.protected_methods, prop) ) {
+      if (force || (typeof value === 'function' && !_.has(value, "wrapped") && !_.has(this.protected_methods, prop) )) {
         
         var wrapper = function() {
 
@@ -478,7 +490,7 @@
           Jacket.callstack.push(log);
 
           if (typeof e !== 'undefined') {
-            e.message = "" + _this.fname + "." + prop + " error: " + e.message;
+            e.message = "" + _this.fname + "." + prop + " : " + e.message;
             Jacket.handle(e);
           }
 
