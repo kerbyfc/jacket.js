@@ -1,4 +1,3 @@
-var coffeescript = require('connect-coffee-script');
 var connect = require('connect');
 var connectRoute = require("connect-route");
 
