@@ -160,10 +160,10 @@ Jacket.handler = function(error_object, extended_error_msg_string, stacktace_arr
 3. Calling a specific callback on each wrapped function call
 
 ```javascript
-J(function(){return false}, function(scope, name, method, args, result) {
+J(function my(a){return a+1;}, function(scope, name, method, args, result) {
   /* it's usefull to implement Backbone.Events for example */
   console.log(arguments);
-})(); 
+})(1); 
 /* WILL OUTPUT TO CONSOLE */
-
+['[Object object]', 'my', 'constructor', [1], 2]
 ```
