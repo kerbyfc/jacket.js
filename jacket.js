@@ -276,8 +276,14 @@
         
       }
 
+      if (this instanceof Jacket) {
+        return function() {
+          return (typeof obj === 'function') ? new obj(arguments) : obj
+        }
+      }
+      
       return obj;
-        
+      
     }
 
     return Jacket;
@@ -297,7 +303,9 @@
       if ( type === 'object' || type === 'function' ) {
 
         this.origin = origin;
-        this.fname = fname;
+      
+        this.fname = fname.length ? fname : (origin.name || '');
+
         this.wrap = this.bind(this.wrap, this);
 
         this.callback = callback;
@@ -305,14 +313,14 @@
       
         if (type === 'function') {
 
-          if (this.origin.name.length > 0 && this.origin.name.toLowerCase() !== 'anonymous') {
+          if (this.fname.length && this.fname.toLowerCase() !== 'anonymous') {
             this.wrap_class();
           } else {
-            this.wrap_object(origin.name);
+            this.wrap_object_or_function(this.fname);
           }
 
         } else {
-          this.wrap_object();
+          this.wrap_object_or_function();
         }
 
       } else {
@@ -327,15 +335,21 @@
       return function(){ return fn.apply(me, arguments); };
     };
 
-    Wearer.prototype.wrap_object = function(name) {
+    Wearer.prototype.wrap_object_or_function = function(name) {
 
       var _this = this;
 
       if (typeof name === 'string') {
-        
-        this.wrapper = this.wrap(_.uniqueId(name || 'anonymous'), this.origin);
+
+        this.wrapper = this.wrap(this.fname, this.origin);
 
         this.wrapper.prototype = this.origin.prototype;
+
+        for (var key in this.origin) {
+          if (_.has(_this.origin, key)) {
+            _this.wrapper[key] = _this.wrap(key, _this.origin[key]);
+          }
+        }
 
         _.each(Object.getPrototypeOf(this.wrapper.prototype), function(val, key, proto) {
           if (_.has(proto, key)) {
@@ -355,18 +369,16 @@
 
       }
 
-      
-
     };
 
     Wearer.prototype.wrap_class = function() {
       
-      var __self__ = this, id = _.uniqueId('w'),
+      var __self__ = this, id = _.uniqueId(this.fname),
         fn = this.parse_function(this.origin.toString());
 
       Jacket.Wearer.members[id] = {scope: __self__, origin: this.origin};
       
-      globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, __self__) {\n  \n  __self__.extend(" + this.origin.name + ", _super, __self__);\n  \n  " + this.origin.name + ".name = \"" + this.origin.name + "\";\n  \n  function " + this.origin.name + "(" + (fn[1].join(", ")) + ") {\n    \n    " + fn[0] + "\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = __self__.wrap(key, val);\n    });\n\n  }\n\n  return " + this.origin.name + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");
+      globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, __self__) {\n  \n  __self__.extend(" + this.fname + ", _super, __self__);\n  \n  " + this.fname + ".name = \"" + this.fname + "\";\n  \n  function " + this.fname + "(" + (fn[1].join(", ")) + ") {\n    \n    " + fn[0] + "\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = __self__.wrap(key, val);\n    });\n\n  }\n\n  return " + this.fname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");
 
       this.wrapper = Wearer.members[id].wrapper;
 
@@ -430,18 +442,20 @@
 
     Wearer.prototype.wrap = function(prop, value) {
       
-      var __self__ = this;
+      var _this = this;
 
       if (typeof prop === 'function') {
         value = prop;
-        prop = 'anonymous';
+        prop = _.uniqueId('anonymous');
       }
+
+      console.log('wrap', typeof this.origin, _this.fname + '.' + prop, '[', typeof value, ']');
 
       if (typeof value === 'function' && !_.has(value, "wrapped") && !_.has(this.protected_methods, prop) ) {
         
         var wrapper = function() {
 
-          var log = {scope: __self__.origin.name, method: prop, args: arguments, time: new Date().getTime()};
+          var log = {scope: _this.fname, method: prop, args: arguments, time: new Date().getTime()};
 
           var result, e;
 
@@ -453,8 +467,8 @@
             /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
                                                /* ...in wrapper class scope */
 
-            if (typeof __self__.callback === "function") {
-              __self__.callback(__self__.origin.name, prop, arguments, result);
+            if (typeof _this.callback === "function") {
+              _this.callback((_this.fname || _this.origin), prop, arguments, result);
             }
 
           } catch (err) {
@@ -464,7 +478,7 @@
           Jacket.callstack.push(log);
 
           if (typeof e !== 'undefined') {
-            e.message = "" + __self__.origin.name + "." + prop + " error: " + e.message;
+            e.message = "" + _this.fname + "." + prop + " error: " + e.message;
             Jacket.handle(e);
           }
 
