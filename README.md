@@ -1,11 +1,54 @@
 Jacket.js
 =========
 
-  ***dress up your classes, functions and objects to Jacket***
+  **Let's dress up your code with <i>Jackets</i>**
+
+1. [Conception](#conception)
+ <br/>1.1 [Pros & cons](#pros-cons)
+2. [Basic Usage](#basic-usage)
+ <br/>2.1. [Functions](#jacketjs)
+ <br/>2.2. [Singletons](#jacketjs)
+ <br/>2.3. [Coffescript classes](#coffescript-classes)
+ <br/>2.4. [Backbone extension](#backbone-extension)
+3. [Error handling](#error-handling)
+ <br/>3.1. [Out of the box](#out-of-the-box)
+ <br/>3.2. [Configuring](#configuring)
+ <br/>3.3. [Writing own handler](#writing-own-handler)
+4. [Additional features](#additional-features)
+ <br/>4.1. [Callbacks](#callbacks)
+ <br/>4.2. [Methods' protection](#methods-protection)
+
+#### Conception
 
 How much we need the callstack when an error occurs at the front? I want it badly... I want avoid of missing notifications about front-end exceptions in production!
 I dont want to wrap each method of my classes in try/catch to handle stacktrace, I want to wrap whole class and rid myself from this boring work.
 That's why the Jacket was appeared.
+
+##### Pros & cons
+
+<table width="100%">
+  <thead><tr><th>pros</th><th>cons</th></tr></thead>
+  <tbody><tr>
+  <td>
+  
+    1. You can handle errors easily, without manual try/catch construction embedding
+    <br/>2. You can prevent script execution stopping, if you need
+    <br/>
+    <br/>
+    <br/>
+  
+  </td>
+  <td>
+  
+    1. You should change your code (a little) if it exists
+    <br/>2. 
+    <br/>
+    <br/>
+    <br/>
+  
+  </td>
+  </tr></tbody>
+</table>
 
 Suppose you have a function, that throws an exception:
 ```javascript
