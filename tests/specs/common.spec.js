@@ -2,49 +2,45 @@
 (function() {
 
   describe('Pure javascript', function() {
-    var anonymous, name, obj, object, _i, _len, _ref, _results;
-    object = {
-      method: function() {
-        return 'method';
-      },
-      prop: 'prop'
-    };
+    var anonymous, obj, object, objects, _i, _len, _results;
+    object = {};
     anonymous = function() {
       return 'anonymous';
     };
     var named = function named() {return false;};
 
-    _ref = [object, anonymous, named];
+    objects = [object, anonymous, named];
     _results = [];
-    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-      obj = _ref[_i];
+    for (_i = 0, _len = objects.length; _i < _len; _i++) {
+      obj = objects[_i];
       obj.method = function() {
         return 'method';
       };
       obj.prop = 'prop';
-      name = (typeof obj === 'function' && obj.name === '' ? 'anonymous ' : '') + ' ' + obj.constructor.name;
-      _results.push(describe('Jacket ( ' + name + ' )', function() {
-        beforeEach(function() {
-          return this.w = J(obj);
-        });
-        it('should return new object', function() {
-          this.w.should.not.eq(obj);
-          return this.w.should.be.instanceOf(Object);
-        });
-        return describe('should have', function() {
-          it('copies of origin object properties', function() {
-            this.w.should.have.ownProperty('prop');
-            this.w.prop.should.equal(obj.prop);
-            this.w.prop = false;
-            return obj.prop.should.be.ok;
+      _results.push((function(obj) {
+        var name, w;
+        name = (typeof obj === 'function' && obj.name === '' ? 'anonymous ' : '') + ' ' + obj.constructor.name;
+        w = J(obj);
+        return describe('Jacket ( ' + name + ' )', function() {
+          it('should return new object', function() {
+            w.should.not.eq(obj);
+            return w.should.be.instanceOf(Object);
           });
-          return it('wrapped origin object methods', function() {
-            this.w.should.have.ownProperty('method');
-            this.w.method.toString().should.not.eq(obj.method.toString());
-            return this.w.method.should.match(Helpers.wrapped_function);
+          return describe('should have', function() {
+            it('copies of origin object properties', function() {
+              w.should.have.ownProperty('prop');
+              w.prop.should.equal(obj.prop);
+              w.prop = false;
+              return obj.prop.should.be.ok;
+            });
+            return it('wrapped origin object methods', function() {
+              w.should.have.ownProperty('method');
+              w.method.toString().should.not.eq(obj.method.toString());
+              return w.method.should.match(Helpers.wrapped_function);
+            });
           });
         });
-      }));
+      })(obj));
     }
     return _results;
   });

@@ -1,92 +1,76 @@
-describe 'CoffeeScript classes', -> 
-
-  test = new J(ExtendedCoffeeClass)(1)
-  test2 = new J( -> console.log arguments )(1)
-  test3 = new J( {lol:3} )(1)
-
-  test4 = J(ExtendedCoffeeClass)(1)
-  test5 = new J( -> console.log arguments )(1)
-  test6 = J( {lol:3} )
-
-
-  console.log ":", test
-  console.log ":", test2
-  console.log ":", test3
-
-  console.log ":", test4
-  console.log ":", test5
-  console.log ":", test6
+describe 'CoffeeScript classes', ->
 
   for _class, i in [CoffeeClass, ExtendedCoffeeClass]
 
-    before ->
-      @W = Jacket(_class)
+    do (_class, i) -> 
 
-    describe 'Jacket ( ' + _class.name + ' )', -> 
+      W = Jacket(_class)
 
-      it 'should return new class', ->
-        @W.should.not.equal CoffeeClass
+      describe 'Jacket ( ' + _class.name + ' )', -> 
 
-      describe 'should have', -> 
+        it 'should return new class', ->
+          W.should.not.equal CoffeeClass
 
-        it 'name of origin class `' + _class.name + '`', -> 
-          @W.name.should.equal _class.name
+        describe 'should have', -> 
 
-        it 'copy of origin class static properties', -> 
-          for own prop, val of _class
-            @W.should.have.ownProperty prop
+          it 'name of origin class `' + _class.name + '`', -> 
+            W.name.should.equal _class.name
 
-        it 'wrapped static methods of origin class', -> 
-          for own prop, val of _class
-            if typeof val is 'function'
-              @W[prop].toString().should.match Helpers.wrapped_function
-      
-    describe 'new Jacket ( ' + _class.name + ' )( )', -> 
+          it 'copy of origin class static properties', -> 
+            for own prop, val of _class
+              W.should.have.ownProperty prop
 
-      it 'should return new instance of wrapped class', -> 
-        w = new @W()
-        w.should.be.instanceOf @W
-        w.id.should.eq i
+          it 'wrapped static methods of origin class', -> 
+            for own prop, val of _class
+              if typeof val is 'function'
+                W[prop].toString().should.match Helpers.wrapped_function
+        
+      describe 'new Jacket ( ' + _class.name + ' )( )', -> 
 
-      describe 'should have', -> 
+        it 'should return new instance of wrapped class', -> 
+          w = new W()
+          w.should.be.instanceOf W
+          w.id.should.eq i+1
 
-        beforeEach -> 
-          @w = new @W()
+        describe 'should have', -> 
 
-        it 'copy of origin class prototype properties in it`s prototype', ->  
-          for key, val of Object.getPrototypeOf _class
-            @w.should.not.have.ownProperty key
-            unless typeof val is 'function'
-              @w.__proto__.should.have.ownProperty key, val
+          beforeEach -> 
+            @w = new W()
 
-        it 'wrapped methods of origin class prototype methods in it`s prototype', -> 
-          for key, val of Object.getPrototypeOf _class
-            if typeof val is 'function'
-              @w.__proto__.should.have.ownProperty key, val
-              @w.__proto__.prototype_method.should.match Helpers.wrapped_function
+          it 'copy of origin class prototype properties in it`s prototype', ->  
+            for key, val of Object.getPrototypeOf _class
+              @w.should.not.have.ownProperty key
+              unless typeof val is 'function'
+                @w.__proto__.should.have.ownProperty key, val
 
-        it 'wrapped binded methods in it`s own scope', -> 
-          @w.should.have.ownProperty 'binded_method'
-          @w.binded_method.should.match Helpers.wrapped_function
+          it 'wrapped methods of origin class prototype methods in it`s prototype', -> 
+            for key, val of Object.getPrototypeOf _class
+              if typeof val is 'function'
+                @w.__proto__.should.have.ownProperty key, val
+                @w.__proto__.prototype_method.should.match Helpers.wrapped_function
 
-        it 'wrapped methods, created in constructor', -> 
-          @w.should.have.ownProperty 'method_defined_in_constructor'
-          @w.method_defined_in_constructor.should.match Helpers.wrapped_function
+          it 'wrapped binded methods in it`s own scope', -> 
+            @w.should.have.ownProperty 'binded_method'
+            @w.binded_method.should.match Helpers.wrapped_function
 
-      if i > 0
-        describe 'should be able to', -> 
+          it 'wrapped methods, created in constructor', -> 
+            @w.should.have.ownProperty 'method_defined_in_constructor'
+            @w.method_defined_in_constructor.should.match Helpers.wrapped_function
 
-          before ->   
-            @p = new (Jacket CoffeeClass)
-            @c = new (Jacket ExtendedCoffeeClass)
+        if i > 1
+          describe 'should be able to', -> 
 
-          it 'run methods defined in parent constructor after `super`', -> 
-            @c.should.have.ownProperty 'method_defined_in_constructor'
-            @c.method_defined_in_constructor().should.eq 'method_defined_in_constructor'
+            before ->   
+              @p = new (Jacket CoffeeClass)
+              @c = new (Jacket ExtendedCoffeeClass)
 
-          it 'run parent class prototype methods', ->
-            @c.should.have.property 'parent_method'
-            @c.parent_method().should.eq 'parent_method'
+            it 'run methods defined in parent constructor after `super`', -> 
+              @c.should.have.ownProperty 'method_defined_in_constructor'
+              @c.method_defined_in_constructor().should.eq 'method_defined_in_constructor'
+
+            it 'run parent class prototype methods', ->
+              @c.should.have.property 'parent_method'
+              @c.parent_method().should.eq 'parent_method'
 
 
 
