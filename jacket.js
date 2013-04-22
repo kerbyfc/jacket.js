@@ -492,7 +492,7 @@
             Jacket.handle(e, _this.fname + "." + prop + " : ");
           }
 
-          return result;
+          return log.result;
 
         };
 
