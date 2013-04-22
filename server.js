@@ -9,6 +9,8 @@ var server = connect (
   connectRoute( function(app) {
     app.post('/error', function(req, res){
       console.log(req.body);
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.end('');
     });
   })
 
