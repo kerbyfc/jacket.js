@@ -1,28 +1,69 @@
 Jacket.js
 =========
 
-  ***dress up your classes, functions and objects to Jacket***
+  **Let's dress up your code with <i>Jackets</i>**
+
+1. [Conception](#1-conception)
+ <br/>1.1 [Pros & cons](#11-pros--cons)
+2. [Basic Usage](#2-basic-usage)
+ <br/>2.1. [Functions](#21-functions)
+ <br/>2.2. [Singletons](#22-singletons)
+ <br/>2.3. [Coffescript classes](#23-coffeescript-classes)
+ <br/>2.4. [Backbone extensions](#24-backbone-extensions)
+3. [Error handling](#3-error-handling)
+ <br/>3.1. [Out of the box](#31-out-of-the-box)
+ <br/>3.2. [Configuring](#32-configuring)
+ <br/>3.3. [Writing own handler](#33-writing-own-handler)
+4. [Additional features](#4-additional-features)
+ <br/>4.1. [Callbacks](#41-callbacks)
+ <br/>4.2. [Methods' protection](#42-methods-protection)
+
+#### 1. Conception
 
 How much we need the callstack when an error occurs at the front? I want it badly... I want avoid of missing notifications about front-end exceptions in production!
 I dont want to wrap each method of my classes in try/catch to handle stacktrace, I want to wrap whole class and rid myself from this boring work.
 That's why the Jacket was appeared.
 
+##### 1.1. Pros & cons
+
+<table width="100%">
+  <thead><tr><th>pros</th><th>cons</th></tr></thead>
+  <tbody><tr>
+  <td>
+  
+    1. You can handle errors easily, without manual try/catch construction embedding
+    <br/>2. You can prevent script execution stopping, if you need
+    <br/>
+    <br/>
+    <br/>
+  
+  </td>
+  <td>
+  
+    1. You should change your code (a little) if it exists
+    <br/>2. 
+    <br/>
+    <br/>
+    <br/>
+  
+  </td>
+  </tr></tbody>
+</table>
+
+#### 2. Basic Usage
+
 Suppose you have a function, that throws an exception:
 ```javascript
-(function() {
-  /* application namespace */
-  var fn = function () {
-    return _undefined + true;
-  }
-  fn();
-}).call(window);
+var fn = function () {
+  return _undefined + true;
+}
+fn();
 ```
 
 to get exception stacktrace you might to handle it with specified handler: 
+
 ```javascript
-var handler = function(err) {
-  /* notify your server about this error */
-}
+var handler = function(err) { /* notify your server about this error */ }
 var fn = function () {
   try {
     return _undefined + true;
@@ -32,10 +73,10 @@ var fn = function () {
 }
 ```
 
-in this case you have a one function call, that supposed to be handled. In case you need to notify your server about all exceptions, raised by you application, you must have an easy way of code' wrapping. 
-    
-    
-##### Jacket.js makes it real!
+in this case you have a one function call, that supposed to be handled. 
+In case you need to notify your server about all exceptions, 
+raised by you application, you must have an easy way of code' wrapping.  
+###### Jacket.js makes it real!
 
 ```javascript
 /* just dress it up :) */
@@ -45,19 +86,15 @@ var fn = Jacket(function () {
 /* then I'll use J instead of Jacket for convenience */
 ```
  
-#### What functionality does it provide in case of error handling?
- - It launches browser' debugger if <i>Jacket.config.use_debugger</i> is positive
- - It outputs error message, stacktrace and callstack to console *
- - It pushes these data to specified url if <i>Jacket.config.notify_url</i> is valid url string
- - It calls your own handler, passing all needed information about an error
- - It can prevent script execution stopping
- 
-\* depends on <i>Jacket.config.log_errors</i>, <i>Jacket.config.log_stacktrace</i> and <i>Jacket.config.log_callstack</i> respectively
+##### Which type of objects can we wrap?
+Jacket.js is able to wrap classes, functions and objects. 
+After exception handling, it will be thrown on and the script 
+execution will be stopped by default. 
+Setup negative <i>Jacket.config.throw_errors</i> 
+value to avoid script execution stopping. 
+You'll see "I`m here" in your console.
 
-#### Which type of objects can we wrap?
-Jacket.js is able to wrap classes, functions and objects. After exception handling, it will be thrown on and the script execution will be stopped by default. Setup negative <i>Jacket.config.throw_errors</i> value to avoid script execution stopping. You'll see "I`m here" in your console.
-
-##### Function's wrapping
+##### 2.1. Functions
 ```javascript
 namespace.sum = function sum(a, b) {
   if (b == null) b = _undefined; /* this will raise an exception */
@@ -87,7 +124,13 @@ J(anonymous)();
 //  - at wrapper (http://localhost:8080/jacket.js:470:50)
 //  - at http://localhost:8080/:80:21
 ```
-As you can see, error message was modified and anonymous function was presented as "anonymous4". We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
+
+As you can see, error message was modified and anonymous function was presented as "anonymous4". 
+We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
+
+
+#### 2.2. Singletons
+
 ```javascript
 var named = J('NamedFunction', anonymous);
 
@@ -117,8 +160,13 @@ named();
 //  - at http://localhost:8080/:84:9
 ```
 
-##### Classes wrapping
-Classes represent a more complex structure than functions. They usually have suite of prototype's methods, instance methods and sometimes static methods. All methods of class are supposed to be wrapped. Instance methods, which were created in constructor supposed to be wrapped after constructor's code execution. If there are callings of these methods inside the constructor and one of them contains mistakes, exception should be catched inside constructor.
+##### 2.3. CoffeeScript classes
+Classes represent a more complex structure than functions. 
+They usually have suite of prototype's methods, instance methods and sometimes static methods. 
+All methods of class are supposed to be wrapped. 
+Instance methods, which were created in constructor supposed to be wrapped after constructor's code execution. 
+If there are callings of these methods inside the constructor and one of them contains mistakes, 
+exception should be catched inside constructor.
 
 ```javascript
 var _Class = (function _Class() {
@@ -145,7 +193,23 @@ new J(_Class)('call defInConst inside constructor')
 //  - at http://localhost:8080/:96:22 
 ```
 
-#### Additional handler
+
+##### 2.4. Backbone extensions
+
+#### 3. Error handling
+
+##### 3.1. Out of the box
+What functionality does it provide in case of error handling?
+ - It launches browser' debugger if <i>Jacket.config.use_debugger</i> is positive
+ - It outputs error message, stacktrace and callstack to console *
+ - It pushes these data to specified url if <i>Jacket.config.notify_url</i> is valid url string
+ - It calls your own handler, passing all needed information about an error
+ - It can prevent script execution stopping
+\* depends on <i>Jacket.config.log_errors</i>, <i>Jacket.config.log_stacktrace</i> and <i>Jacket.config.log_callstack</i> respectively
+
+##### 3.2. Configuring
+
+##### 3.3. Writing own handler
 ```javascript
 /* create additional handler */
 Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
@@ -153,17 +217,29 @@ Jacket.handler = function(error_object, extended_error_msg_string, stacktace_arr
 }
 ```
 
-#### What functionality does it give? TODO
+
+
+
+##### What functionality does it give? TODO
 
 1. Handling exceptions, raised in function or in public methods of function instance (class)
 2. Notify your server about exceptions
 3. Calling a specific callback on each wrapped function call
 
+
+#### 4. Additional features
+
+
+##### 4.1. Callbacks
+
+##### 4.2. Method's protection
+
+
 ```javascript
 J(function my(a){return a+1;}, function(scope, name, method, args, result) {
   /* it's usefull to implement Backbone.Events for example */
   console.log(arguments);
-})(1); 
+})(1);
 /* WILL OUTPUT TO CONSOLE */
 ['[Object object]', 'my', 'constructor', [1], 2]
 ```
