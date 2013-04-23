@@ -54,7 +54,7 @@ That's why the Jacket was appeared.
 Suppose you have a function, that throws an exception:
 ```javascript
 var fn = function () {
-  return _undefined + true;
+  return _undefined;
 }
 fn();
 ```
@@ -65,7 +65,7 @@ to get exception stacktrace you might to handle it with specified handler:
 var handler = function(err) { /* notify your server about this error */ }
 var fn = function () {
   try {
-    return _undefined + true;
+    return _undefined;
   } catch (e) {
     handler(e);
   }
@@ -81,23 +81,20 @@ Javascript
 ```javascript
 /* just dress it up :) */
 var fn = Jacket(function () {
-  return _undefined + true;
+  return _undefined;
 });
 /* then I'll use J instead of Jacket for convenience */
 ```
 Coffeescript
-```coffescript
+```coffeescript
 J -> 
- _undefined + true;
+ _undefined
 ```
  
 ##### Which type of objects can we wrap?
 Jacket.js is able to wrap classes, functions and objects. 
 After exception handling, it will be thrown on and the script 
 execution will be stopped by default. 
-Setup negative <i>Jacket.config.throw_errors</i> 
-value to avoid script execution stopping. 
-You'll see "I`m here" in your console.
 
 ##### 2.1. Functions
 ```javascript
@@ -105,7 +102,6 @@ namespace.sum = function sum(a, b) {
   if (b == null) b = _undefined; /* this will raise an exception */
   this.result = a + b;
   return this.result;
-
 }
 
 J(namespace.sum)(1, 1);         // 2
@@ -114,7 +110,11 @@ new J(namespace.sum)(1, 1);     // Object {result: 2}
 J(namespace.sum)('oops!');      // sum constructor : _undefined is not defined
                                 //  - at http://localhost:8080/:68:25
                                
-console.log('I`m here');        /* will not be executed, because exception will be raised */    
+console.log('I`m here');        /* will not be executed, because exception will be raised
+                                   Setup negative <i>Jacket.config.throw_errors</i> 
+                                   value to avoid script execution stopping
+                                   and you'll see "I`m here" in your console. */
+
 ```
 Lets play with anonymous functions
 ```javascript
