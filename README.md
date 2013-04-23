@@ -77,12 +77,18 @@ In case you need to notify your server about all exceptions,
 raised by you application, you must have an easy way of code' wrapping.  
 ###### Jacket.js makes it real!
 
+Javascript
 ```javascript
 /* just dress it up :) */
 var fn = Jacket(function () {
   return _undefined + true;
 });
 /* then I'll use J instead of Jacket for convenience */
+```
+Coffeescript
+```coffescript
+J -> 
+ _undefined + true;
 ```
  
 ##### Which type of objects can we wrap?
