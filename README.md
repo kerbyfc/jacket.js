@@ -35,7 +35,7 @@ That's why the Jacket was appeared.
   <td>
   
     1. Easy error handling without manual try/catch construction embedding.
-    <br/>2. More readable stacktrace and error messages helps to find errors faster.
+    <br/>2. More readable stacktraces and error messages help to find errors faster.
     <br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique
     <br/>4. Perfectly approaches to event-driven architecture
     <br/>5. Prevention of script execution stopping, if it needed.
