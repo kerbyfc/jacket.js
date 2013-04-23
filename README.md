@@ -98,22 +98,22 @@ execution will be stopped by default.
 
 ##### 2.1. Functions
 ```javascript
-namespace.sum = function sum(a, b) {
-  if (b == null) b = _undefined; /* this will raise an exception */
+function sum(a, b) {
+  if (!b) b = _undefined; /* this will raise an exception */
   this.result = a + b;
   return this.result;
 }
 
-J(namespace.sum)(1, 1);         // 2
-new J(namespace.sum)(1, 1);     // Object {result: 2}
+J(sum)(1, 1);             // 2
+new J(sum)(1, 1);         // Object {result: 2}
 
-J(namespace.sum)('oops!');      // sum constructor : _undefined is not defined
-                                //  - at http://localhost:8080/:68:25
-                               
-console.log('I`m here');        /* will not be executed, because exception will be raised
-                                   Setup negative <i>Jacket.config.throw_errors</i> 
-                                   value to avoid script execution stopping
-                                   and you'll see "I`m here" in your console. */
+J(sum)('oops!');          // sum constructor : _undefined is not defined
+                          //  - at http://localhost:8080/:68:25
+                              
+console.log('I`m here');  /* will not be executed, because exception will be raised
+                             Setup negative Jacket.config.throw_errors 
+                             value to avoid script execution stopping
+                             and you'll see "I`m here" in your console. */
 
 ```
 Lets play with anonymous functions
