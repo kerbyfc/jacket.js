@@ -20,8 +20,11 @@ Jacket.js
 
 #### 1. Conception
 
-How much we need the callstack when an error occurs at the front? I want it badly... I want avoid of missing notifications about front-end exceptions in production!
-I dont want to wrap each method of my classes in try/catch to handle stacktrace, I want to wrap whole class and rid myself from this boring work.
+How much we need the callstack when an error occurs at the front? I want it badly... 
+I want avoid of missing notifications about front-end exceptions in production!
+I dont want to wrap each method of my classes in try/catch to handle stacktrace, 
+I want to wrap whole class and rid myself from this boring work.
+Also, I need the easy way to aggregate my functions with callbacks.
 That's why the Jacket was appeared.
 
 ##### 1.1. Pros & cons
@@ -31,20 +34,16 @@ That's why the Jacket was appeared.
   <tbody><tr>
   <td>
   
-    1. You can handle errors easily, without manual try/catch construction embedding
-    <br/>2. You can prevent script execution stopping, if you need
-    <br/>
-    <br/>
-    <br/>
+    1. Easy error handling without manual try/catch construction embedding.
+    <br/>2. More readable stacktrace and error messages helps to find errors faster.
+    <br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique
+    <br/>4. Perfectly approaches to event-driven architecture
+    <br/>5. Prevention of script execution stopping, if it needed.
   
   </td>
-  <td>
+  <td valign="top">
   
     1. You should change your code (a little) if it exists
-    <br/>2. 
-    <br/>
-    <br/>
-    <br/>
   
   </td>
   </tr></tbody>
@@ -231,6 +230,11 @@ Jacket.handler = function(error_object, extended_error_msg_string, stacktace_arr
 
 
 ##### 4.1. Callbacks
+
+You can specify a global callback function, 
+that should be runned before each return statement of class' methods. 
+This callback gets execution scope, class name, method name, 
+method arguments and its result as arguments
 
 ##### 4.2. Method's protection
 
