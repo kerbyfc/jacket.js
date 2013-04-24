@@ -75,14 +75,21 @@
 
   Jacket = (function() {
 
+    Jacket.is_node = (typeof module !== "undefined" && module.exports)
+
     Jacket.callstack = [];
 
     Jacket.config = {
       log_errors: true, log_stacktrace: true, log_callstack: true,
       use_debugger: false,
       throw_errors: true,
-      notify_url: false
+      notify_url: false,
+      events_count: 100
     };
+
+    Jacket.startTime = (new Date).getTime()
+
+    Jacket.events = []
 
     // try print log in console
     Jacket.log = function() {
@@ -144,7 +151,7 @@
       }
 
       // send exception data to server
-      if (this.config.notify_url) {
+      if (this.config.notify_url && !this.is_node) {
 
         // abort if url is not a valid url
         if (!(typeof this.config.notify_url === "string" && (this.config.notify_url.match(Jacket.url) !== null))) {
@@ -153,9 +160,12 @@
         } else {
           this.notify({
             date: (new Date()).toString(),
+            moment: this.moment(),
+            events: this.events,
             message: msg,
             stacktrace: stack,
-            callstack: this.callstack
+            callstack: this.callstack,
+            browser : this.navigator.userAgent
           });
         }
       }
@@ -171,26 +181,52 @@
     };
 
     Jacket.sensor = function (censor) {
-      
       return (function () {
         var i = 0;
-
-        return function(key, value) {
-          
+        return function(key, value) {          
           if (i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value) {
             return '[Circular]';
           }
-
-          if (i >= 100) // seems to be a harded maximum of 30 serialized objects?
+          if (i >= 200)
             return '[Unknown]';
-
-          ++i; // so we know we aren't using the original object anymore
-
+          ++i;
           return value;
         };
-
       })(censor);
+    };
 
+    Jacket.moment = function() {
+      return ((new Date()).getTime() - this.startTime) / 1000;
+    };
+
+    Jacket.logEvent = function (elem, event) {
+      if (elem.addEventListener) {
+        elem.addEventListener(event, Jacket.pushEvent, false);
+      } else {
+        elem.attachEvent("on" + event, function() {
+          return(Jacket.pushEvent.call(elem, window.event));   
+        });
+      }
+    };
+
+    Jacket.getNodePath = function(node) {
+      var info = node.nodeName
+      if (node.id) {
+        info += "#" + node.id;
+      }
+      if (node.className) {
+        info += "." + node.className;
+      }
+      return info;
+    };
+
+    Jacket.pushEvent = function(event) {
+      Jacket.events.unshift({
+        type: event.type,
+        node: Jacket.getNodePath( event.target ),
+        moment: Jacket.moment(),
+        time: (new Date())
+      });
     };
 
     // send data to server
@@ -201,7 +237,7 @@
       if (xhr) {
 
         xhr.open("POST", this.config.notify_url, true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.setRequestHeader( "Content-type", "applcation/json" );
 
         var json;
 
@@ -293,6 +329,8 @@
 
   })();
 
+  Jacket.logEvent(window, "load");
+  Jacket.logEvent(document.body, "click");
 
   Jacket.Wearer = (function() {
 
@@ -390,15 +428,11 @@
       var _wrapper = this, id = _.uniqueId(this.fname),
         fn = this.parse_function(this.origin.toString());
 
-      console.log("Wrapp class", id);
-
       Jacket.Wearer.members[id] = {scope: _wrapper, origin: this.origin};
 
       this._constructor = this.wrap('constructor', this.origin, true);
       
       globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, _wrapper) {\n  \n  _wrapper.extend(" + this.fname + ", _super, _wrapper);\n  \n  " + this.fname + ".name = \"" + this.fname + "\";\n  \n  function " + this.fname + "() {\n\n    _wrapper._constructor.apply(this, arguments);\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = _wrapper.wrap(key, val);\n    });\n\n  }\n\n  return " + this.fname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");      
-
-      //globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, _wrapper) {\n  \n  _wrapper.extend(" + this.fname + ", _super, _wrapper);\n  \n  " + this.fname + ".name = \"" + this.fname + "\";\n  \n  function " + this.fname + "(" + (fn[1].join(", ")) + ") {\n\n    " + fn[0] + "\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = _wrapper.wrap(key, val);\n    });\n\n  }\n\n  return " + this.fname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");
 
       this.wrapper = Wearer.members[id].wrapper;
 
@@ -708,8 +742,7 @@
 
   }
 
-  if (typeof module !== "undefined" && module.exports) {
-    Jacket.is_node = true;
+  if (Jacket.is_node) {
     module.exports = Jacket;
   }
 
