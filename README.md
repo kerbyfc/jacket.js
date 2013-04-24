@@ -44,8 +44,9 @@ Actual questions, aren't they?
   
     1. Easy error handling without manual try/catch construction embedding.
     <br/>2. More readable stacktraces and error messages help to find errors faster.
-    <br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique
-    <br/>4. Perfectly approaches to event-driven architecture
+    <br/>3. Send stacktrace, callstack, event log, exception message and another helpful data to server.
+    <br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique.
+    <br/>4. Perfectly approaches to event-driven architecture.
     <br/>5. Prevention of script execution stopping, if it needed.
   
   </td>
