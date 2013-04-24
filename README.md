@@ -20,15 +20,17 @@ Jacket.js
 
 #### 1. Conception
 
-Ask yourself: "How much i need to get stacktrace when an error occurs on client side?"
-I want it badly, especially in production. 
+Ask yourself: 
+"How much i need of getting stack trace when an error occurs on client side?". 
+I want it badly, especially in production.
 <br/>If you think too, I suppose that jacket - is what you need.
 
 However, you can handle stack trace only by "try & catch" construction,
 because window.onerror handler does not provide that.
 
 * And what you might to do in this case? 
-* How to rid yourself from this boring work? 
+* How to rid yourself from this boring work?
+* How to speed up searching of code mistakes?
 * Is there any way of easy code' wrapping?
 
 Actual questions, aren't they?
