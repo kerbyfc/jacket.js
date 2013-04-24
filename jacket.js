@@ -383,7 +383,7 @@
         Jacket.handle(new Error('Only functions and objects can wear Jacket'));
       }
 
-      console.log(this.wrapper);
+      // console.log(this.wrapper);
 
       return this.wrapper;
 
@@ -503,7 +503,7 @@
         prop = _.uniqueId('anonymous');
       }
 
-      console.log('wrap', typeof this.origin, _this.fname + '.' + prop, '[', typeof value, ']');
+      // console.log('wrap', typeof this.origin, _this.fname + '.' + prop, '[', typeof value, ']');
 
       if (force || (typeof value === 'function' && !_.has(value, "wrapped") && !_.has(this.protected_methods, prop) )) {
         

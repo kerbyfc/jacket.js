@@ -2,17 +2,85 @@
 <html>
   <head>
       <title>Jacket examples</title>
+
+      <style>
+        .console {
+          width: 100%;
+          border: 1px solid #ccc;
+          color: #222;
+          line-height: 15px;
+          padding: 5px;
+          margin: 5px 5px 0 5px;
+        }
+      </style>
+
   </head>
   <body>
 
+
     <script type="text/javascript" src="../jacket.min.js"></script>
 
+    <script type="text/javascript">
+      Jacket.config.throw_errors = false;
+
+
+      window.log = function() {
+
+        var non_comment = false;
+        if (arguments.length) {
+          if (arguments[0] === 'non_comment') {
+            arguments = Array.prototype.slice.call(arguments, 1);
+            non_comment = true;
+          }
+        }
+
+        if (arguments.length) {
+          
+          var text = '\n';
+
+          for (var i in arguments) {
+            var res, txt = arguments[i];
+            try {
+              if ( (typeof txt).match(/object/i) ) {
+                res = JSON.stringify(txt, Jacket.sensor(txt));
+              } else {
+                res = txt.toString();
+              }
+            } catch (e) {
+              res = typeof txt;
+            }
+            text += res + ' ';
+          }
+
+          if (!non_comment) {
+            text = text.replace(/(\n)/g, '\n\/\/ ');
+          }
+
+          window.log_text += text;
+        }
+      }
+
+      Jacket.log = window.log;
+      Jacket.err = window.log;
+
+      window.example = function(name, fn) {
+        window.log_text = '';
+        log("examples/" + window.example_group + '/' + name + '.js');
+        log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n'), '\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
+        fn.call(window);
+        document.write('<textarea class="console" rows="' + window.log_text.match(/\n/g).length + '">' + window.log_text + '</textarea>');
+      }
+
+    </script>
+
+    <script type="text/javascript">example_group = 'wrapping';</script>
     <script type="text/javascript" src="wrapping/function.js"></script>
     <script type="text/javascript" src="wrapping/anonymous.js"></script>
     <script type="text/javascript" src="wrapping/singleton.js"></script>
     <script type="text/javascript" src="wrapping/coffeeclass.js"></script>
     <script type="text/javascript" src="wrapping/backbone.js"></script>
 
+    <script type="text/javascript">example_group = 'handling';</script>
     <script type="text/javascript" src="handling/errors.js"></script>
     <script type="text/javascript" src="handling/callstack.js"></script>
     <script type="text/javascript" src="handling/stacktrace.js"></script>
@@ -20,6 +88,7 @@
     <script type="text/javascript" src="handling/notifier.js"></script>
     <script type="text/javascript" src="handling/additional.js"></script>
 
+    <script type="text/javascript">example_group = 'features';</script>
     <script type="text/javascript" src="features/renaming.js"></script>
     <script type="text/javascript" src="features/callbacks.js"></script>
     <script type="text/javascript" src="features/protecting.js"></script>
