@@ -135,7 +135,7 @@
       // parse error stacktrace with printStackTrace (http://stacktracejs.com)
       var stack = [];
       _.each(printStackTrace({e:err}), function(call) {
-        if (call.match(/eval|_fn_wrapper/) === null) {
+        if (call.match(/eval|_fn_wrapper|(jacket[\.\w]*.js)/) === null) {
           stack.push(call);
         }
       });

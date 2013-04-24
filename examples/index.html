@@ -11,6 +11,8 @@
           line-height: 15px;
           padding: 5px;
           margin: 5px 5px 0 5px;
+          font-size: 13px;
+
         }
       </style>
 
@@ -64,11 +66,14 @@
       Jacket.err = window.log;
 
       window.example = function(name, fn) {
-        window.log_text = '';
+        window.log_text = '```javascript\n';
         log("examples/" + window.example_group + '/' + name + '.js');
-        log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n'), '\n - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
+        log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n').replace(/log[\s]*\(/g, 'console.log('), '\n// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
         fn.call(window);
-        document.write('<textarea class="console" rows="' + window.log_text.match(/\n/g).length + '">' + window.log_text + '</textarea>');
+
+        window.log_text += '\n```';
+
+        document.write('<textarea class="console" rows="' + window.log_text.match(/\n/g).length + '">' + window.log_text.replace(/[\n]+[\s]*[\n]+/g, '\n\n') + '</textarea>');
       }
 
     </script>
