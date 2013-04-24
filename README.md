@@ -20,12 +20,18 @@ Jacket.js
 
 #### 1. Conception
 
-How much we need the callstack when an error occurs at the front? I want it badly... 
-I want avoid of missing notifications about front-end exceptions in production!
-I dont want to wrap each method of my classes in try/catch to handle stacktrace, 
-I want to wrap whole class and rid myself from this boring work.
-Also, I need the easy way to aggregate my functions with callbacks.
-That's why the Jacket was appeared.
+Ask yourself: "How much i need to get stacktrace when an error occurs on client side?"
+I want it badly, especially in production. 
+<br/>If you think too, I suppose that jacket - is what you need.
+
+However, you can handle stack trace only by "try & catch" construction,
+because window.onerror handler does not provide that.
+
+* And what you might to do in this case? 
+* How to rid yourself from this boring work? 
+* Is there any way of easy code' wrapping?
+
+Actual questions, aren't they?
 
 ##### 1.1. Pros & cons
 
