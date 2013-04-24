@@ -67,7 +67,7 @@ var fn = function () {
 fn();
 ```
 
-to get exception stacktrace you might to handle it with specified handler: 
+To get stack trace you might handle error by this way: 
 
 ```javascript
 var handler = function(err) { /* notify your server about this error */ }
@@ -80,9 +80,9 @@ var fn = function () {
 }
 ```
 
-in this case you have a one function call, that supposed to be handled. 
-In case you need to notify your server about all exceptions, 
-raised by you application, you must have an easy way of code' wrapping.  
+However, in this case you have a one function call, that supposed to be handled. 
+In case you need to handle and notify your server about all exceptions, 
+raised by you client side application, you must have an easy way of code' wrapping.  
 ###### Jacket.js makes it real!
 
 Javascript
