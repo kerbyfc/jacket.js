@@ -83,7 +83,7 @@ var fn = function () {
 However, in this case you have a one function call, that supposed to be handled. 
 In case you need to handle and notify your server about all exceptions, 
 raised by you client side application, you must have an easy way of code' wrapping.  
-###### Jacket.js makes it real!
+##### Jacket.js makes it real!
 
 Javascript
 ```javascript
