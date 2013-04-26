@@ -457,6 +457,10 @@
   
     Wearer.prototype.extend = function(child, parent, context) {
       
+      if (!context) {
+        context = Jacket.Wearer.prototype;
+      }
+      
       for (var key in parent) {
         if (_.has(parent, key)) {
           child[key] = context.wrap(key, parent[key], child);
