@@ -345,7 +345,7 @@
 
         this.origin = origin;
 
-        this.fname = (typeof fname === 'string' and fname) ? fname : (origin.name || '');
+        this.fname = (typeof fname === 'string' && fname.length) ? fname : (origin.name || '');
 
         this.wrap = this.bind(this.wrap, this);
 
