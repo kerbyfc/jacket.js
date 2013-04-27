@@ -72,7 +72,7 @@
       window.example = function(name, fn) {
         window.log_text = '```javascript\n';
         log("examples/" + window.example_group + '/' + name + '.js - - - - - - - - - - - - - - - - - - - - - -');
-        log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n').replace(/log[\s]*\(/g, 'console.log('), '\n// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
+        log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n').replace(/\slog[\s]*\(/g, 'console.log('), '\n// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
         fn.call(window);
 
         window.log_text += '\n```';
