@@ -19,15 +19,19 @@
   </head>
   <body>
 
+    <script type="text/javascript" src="../javascripts/vendor/marked.js"></script>
     <script type="text/javascript" src="../javascripts/vendor/jquery.js"></script>
     <script type="text/javascript" src="../javascripts/vendor/underscore.js"></script>
     <script type="text/javascript" src="../javascripts/vendor/backbone.js"></script>
 
     <script type="text/javascript" src="../jacket.js"></script>
 
+
+
     <script type="text/javascript">
       Jacket.config.throw_errors = false;
 
+      console.log(marked("i am using __markdown__."));
 
       window.log = function() {
 
@@ -81,6 +85,8 @@
       }
 
     </script>
+
+    <div class="test"></div>
 
     <script type="text/javascript">example_group = 'wrapping';</script>
     <script type="text/javascript" src="wrapping/function.js"></script>

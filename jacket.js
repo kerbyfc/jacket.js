@@ -443,22 +443,48 @@
       var _wrapper = this, id = _.uniqueId(this.fname),
         fn = this.parse_function(this.origin.toString());
 
+      this._constructor = this.wrap('constructor', this.origin, true);
+
+      if (this.extentions && _.has(this.extentions, 'constructor')) {
+        var __super__ = this._constructor.prototype;
+        this._constructor = this.extentions.constructor;  
+        this._constructor.__super__ = __super__;
+      }
+
+      // var child;
+
+      // if (this.extentions && _.has(this.extentions, 'constructor')) {
+      //   this.extentions.constructor.__super__ = this._constructor;
+      //   child = this.extentions.constructor;
+      // } else {
+      //   child = function() { return _wrapper._consapply(this, arguments); }
+      // }
+
+      // var Surrogate = function(){ this.constructor = child; };
+      // Surrogate.prototype = parent.prototype;
+      // child.prototype = new Surrogate;
+
+      // child.__super__ = this.origin.prototype.constructor;
+
+      // this._constructor = child;
+
       Jacket.Wearer.members[id] = {scope: _wrapper, origin: this.origin};
 
-      if (_.has(this.extentions, 'constructor')) {
-        
-        this.origin.constructor = this.extentions.constructor;
-        this.origin.prototype.__super__ = this.origin.prototype;
-        
-      } 
-        
-      this._constructor = this.wrap('constructor', this.origin, true);
+      console.log(' ------- ', this._constructor, this._constructor.__super__);
+
+      this.cname = this.fname.substring(this.fname.lastIndexOf('.') + 1);
+
+      _class = "Jacket.Wearer.members['" + id + "'].wrapper = " + this.fname + " = (function(_super, _wrapper) {\n  \n  _wrapper.extend(" + this.cname + ", _super, _wrapper);\n  \n  " + this.cname + ".name = \"" + this.cname + "\";\n  \n  function " + this.cname + "() {\n\n    \n    _wrapper.do_wraps(_wrapper.extentions, this);\n    _wrapper._constructor.apply(this, arguments);\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = _wrapper.wrap(key, val);\n    });\n\n  }\n\n  console.log('+++', _wrapper._constructor.__super__);" + this.cname + ".prototype.__super__ = _wrapper._constructor.__super__;\n  return " + this.cname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n";
       
-      globalEval("Jacket.Wearer.members['" + id + "'].wrapper = (function(_super, _wrapper) {\n  \n  _wrapper.extend(" + this.fname + ", _super, _wrapper);\n  \n  " + this.fname + ".name = \"" + this.fname + "\";\n  \n  function " + this.fname + "() {\n\n    _wrapper.do_wraps(_wrapper.extentions, this); _wrapper._constructor.apply(this, arguments);\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = _wrapper.wrap(key, val);\n    });\n\n  }\n\n  return " + this.fname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n");      
+      console.log(_class);
+
+      globalEval(_class);      
 
       this.wrapper = Wearer.members[id].wrapper;
 
-      this.wrapper.prototype['wrap'] = this.wrap;
+      console.log(this.wrapper);
+
+      // this.wrapper.prototype['wrap'] = this.wrap;
 
       _.each(Object.getPrototypeOf(this.wrapper.prototype), function(val, key, proto) {
         if (_.has(proto, key)) {
