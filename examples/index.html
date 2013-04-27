@@ -19,8 +19,11 @@
   </head>
   <body>
 
+    <script type="text/javascript" src="../javascripts/vendor/jquery.js"></script>
+    <script type="text/javascript" src="../javascripts/vendor/underscore.js"></script>
+    <script type="text/javascript" src="../javascripts/vendor/backbone.js"></script>
 
-    <script type="text/javascript" src="../jacket.min.js"></script>
+    <script type="text/javascript" src="../jacket.js"></script>
 
     <script type="text/javascript">
       Jacket.config.throw_errors = false;
@@ -55,7 +58,8 @@
           }
 
           if (!non_comment) {
-            text = text.replace(/(\n)/g, '\n\/\/ ');
+            text = text.replace(/(\n)/g, '\n\/\/ ').replace(/-[\s]*[-]+/g, '');
+            console.log.apply(console, arguments);
           }
 
           window.log_text += text;
@@ -67,7 +71,7 @@
 
       window.example = function(name, fn) {
         window.log_text = '```javascript\n';
-        log("examples/" + window.example_group + '/' + name + '.js');
+        log("examples/" + window.example_group + '/' + name + '.js - - - - - - - - - - - - - - - - - - - - - -');
         log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n').replace(/log[\s]*\(/g, 'console.log('), '\n// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
         fn.call(window);
 

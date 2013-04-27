@@ -10,12 +10,14 @@ describe 'Backbone.View.extend', ->
 
     describe 'should have', -> 
 
-      it 'empty name', -> 
-        @W.name.should.equal ''
+      it 'correct name', -> 
+        @W.name.should.equal 'OLOL'
 
       it 'wrapped prototype methods of __super__', -> 
-        for prop, val of @W.prototype
-          val.should.match Helpers.wrapped_function if typeof val is 'function'
+        for own prop, val of @W.prototype
+          if typeof val is 'function' and prop isnt 'constructor'
+            console.log ' >>>> ', prop, val
+            val.should.match Helpers.wrapped_function 
 
     
       

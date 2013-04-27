@@ -49,6 +49,7 @@
           it('should return new instance of wrapped class', function() {
             var w;
             w = new W();
+            console.log('<><><>', w);
             w.should.be.instanceOf(W);
             return w.id.should.eq(i + 1);
           });
