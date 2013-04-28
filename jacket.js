@@ -89,6 +89,8 @@
 
     Jacket.startTime = (new Date).getTime()
 
+    Jacket.wearers = {}
+
     Jacket.events = []
 
     // try print log in console
@@ -295,7 +297,7 @@
 
         if (typeof extentions !== 'object') {
           methods = extentions;
-          extentions = {};
+          extentions = false;
         }
         
         if (typeof callback !== "function" && typeof methods === 'function') {
@@ -395,15 +397,6 @@
 
     }
 
-    Wearer.prototype.do_wraps = function(origin, target) {
-      var _this = this;
-      for (key in origin) {
-          if (_.has(origin, key)) {
-            target[key] = _this.wrap( key, origin[key] );
-          }
-        }
-    }
-
     Wearer.prototype.bind = function (fn, me) {
       return function(){ return fn.apply(me, arguments); };
     };
@@ -440,51 +433,32 @@
 
     Wearer.prototype.wrap_class = function() {
 
-      var _wrapper = this, id = _.uniqueId(this.fname),
-        fn = this.parse_function(this.origin.toString());
+      var _wrapper = this, id = _.uniqueId(this.fname);
+        // fn = this.parse_function(this.origin.toString());
 
       this._constructor = this.wrap('constructor', this.origin, true);
 
       if (this.extentions && _.has(this.extentions, 'constructor')) {
         var __super__ = this._constructor.prototype;
-        this._constructor = this.extentions.constructor;  
+        this._constructor = this.wrap('constructor', this.extentions.constructor, true);  
         this._constructor.__super__ = __super__;
       }
 
-      // var child;
-
-      // if (this.extentions && _.has(this.extentions, 'constructor')) {
-      //   this.extentions.constructor.__super__ = this._constructor;
-      //   child = this.extentions.constructor;
-      // } else {
-      //   child = function() { return _wrapper._consapply(this, arguments); }
-      // }
-
-      // var Surrogate = function(){ this.constructor = child; };
-      // Surrogate.prototype = parent.prototype;
-      // child.prototype = new Surrogate;
-
-      // child.__super__ = this.origin.prototype.constructor;
-
-      // this._constructor = child;
-
-      Jacket.Wearer.members[id] = {scope: _wrapper, origin: this.origin};
+      Jacket.wearers[id] = {scope: _wrapper, origin: this.origin};
 
       console.log(' ------- ', this._constructor, this._constructor.__super__);
 
       this.cname = this.fname.substring(this.fname.lastIndexOf('.') + 1);
 
-      _class = "Jacket.Wearer.members['" + id + "'].wrapper = " + this.fname + " = (function(_super, _wrapper) {\n  \n  _wrapper.extend(" + this.cname + ", _super, _wrapper);\n  \n  " + this.cname + ".name = \"" + this.cname + "\";\n  \n  function " + this.cname + "() {\n\n    \n    _wrapper.do_wraps(_wrapper.extentions, this);\n    _wrapper._constructor.apply(this, arguments);\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = _wrapper.wrap(key, val);\n    });\n\n  }\n\n  console.log('+++', _wrapper._constructor.__super__);" + this.cname + ".prototype.__super__ = _wrapper._constructor.__super__;\n  return " + this.cname + ";\n\n})(Jacket.Wearer.members['" + id + "'].origin, Jacket.Wearer.members['" + id + "'].scope);\n";
+      _class = "Jacket.wearers['" + id + "'].wrapper = " + this.fname + " = (function(_super, jacket) {\n\n  jacket.extend(" + this.cname + ", _super, jacket);\n  \n  " + this.cname + ".name = \"" + this.cname + "\";\n  \n  function " + this.cname + "() {\n\n    \n    " + ( this.extentions ?  "this.__super__ = jacket._constructor.__super__;" : "") +  "jacket.do_wraps(jacket.extentions, this);\n    jacket._constructor.apply(this, arguments);\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = jacket.wrap(key, val);\n    });\n\n  }\n\n  return " + this.cname + ";\n\n})(Jacket.wearers['" + id + "'].origin, Jacket.wearers['" + id + "'].scope);\n";
       
       console.log(_class);
 
       globalEval(_class);      
 
-      this.wrapper = Wearer.members[id].wrapper;
+      this.wrapper = Jacket.wearers[id].wrapper;
 
       console.log(this.wrapper);
-
-      // this.wrapper.prototype['wrap'] = this.wrap;
 
       _.each(Object.getPrototypeOf(this.wrapper.prototype), function(val, key, proto) {
         if (_.has(proto, key)) {
@@ -493,6 +467,15 @@
       });
 
     };
+
+    Wearer.prototype.do_wraps = function(origin, target) {
+      var _this = this;
+      for (key in origin) {
+          if (_.has(origin, key)) {
+            target[key] = _this.wrap( key, origin[key] );
+          }
+        }
+    }
 
     Wearer.prototype.protect = function(protected_methods) {
       var _this = this;
@@ -525,25 +508,25 @@
 
     };
 
-    Wearer.prototype.parse_function = function(fn) {
+    // Wearer.prototype.parse_function = function(fn) {
       
-      var matches = fn.replace(/(\n)/g, "{n}").match(/^function[\s]+[\w]*\(([\w\s,_\$]*)?\)[\s]*\{(.*)\}[\s]*$/);
-      var result = [];
+    //   var matches = fn.replace(/(\n)/g, "{n}").match(/^function[\s]+[\w]*\(([\w\s,_\$]*)?\)[\s]*\{(.*)\}[\s]*$/);
+    //   var result = [];
 
-      if (matches) {
-        if (matches[1]) {
-          result = matches[1].match(/((?!=^|,)([\w\$_]))+/g);
-        }
-        result.unshift(matches[2].replace(/\{n\}/g, "\n"));
-      }
-      if (result.length > 0) {
-        result[0] = "try { " + result[0] + (" \n    } catch (e) { \n      Jacket.handle(e, _wrapper.fname + \".constructor : \"); \n    }");
-      }
-      result = [result[0], result.slice(1) || []];
+    //   if (matches) {
+    //     if (matches[1]) {
+    //       result = matches[1].match(/((?!=^|,)([\w\$_]))+/g);
+    //     }
+    //     result.unshift(matches[2].replace(/\{n\}/g, "\n"));
+    //   }
+    //   if (result.length > 0) {
+    //     result[0] = "try { " + result[0] + (" \n    } catch (e) { \n      Jacket.handle(e, _wrapper.fname + \".constructor : \"); \n    }");
+    //   }
+    //   result = [result[0], result.slice(1) || []];
       
-      return result;
+    //   return result;
     
-    };
+    // };
 
 
     Wearer.prototype.wrap = function(prop, value, force) {

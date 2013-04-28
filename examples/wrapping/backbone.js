@@ -1,10 +1,9 @@
 example( 'anonymous', function() {
 
-  var view = J('Jacket.View', Backbone.View, {
+  window.view = J('Jacket.View', Backbone.View, {
     el: '.test',
     constructor: function() {
-      console.log(this);
-      this.__super__.constructor.apply(this, arguments);
+      view.__super__.constructor.apply(this, arguments);
       console.log(' +++++++++++++ ');
       this.i = 1;
       console.log(this.i);
@@ -16,26 +15,30 @@ example( 'anonymous', function() {
       // super()
     },
     render: function() {
-      this.__super__.render.apply(this, arguments);
+      view.__super__.render.apply(this, arguments);
       this.$el.append('<span>cool</span>');
       console.log(this.ADDITIOANAL(), this.i);
+    },
+    view1method: function() {
+      console.log('aaahahahahahah');
     }
   });
-
-  console.log('VIEW', view);
 
   var view2 = J('View2', view, {
     constructor: function() {
       this.__super__.constructor.apply(this, arguments);
-      console.log('view2');
+      console.log('view2', this);
+      this.view1method();
     }
   });
 
-  var v1 = new view;
-  var v2 = new view2;
+  window.v1 = new view;
+  window.v2 = new view2;
+
+  v2.render();
 
 
-
+  log(v1); 
 
   /* 
     - хочу получить:
