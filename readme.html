@@ -9,37 +9,72 @@
 
       <style>
 
+        body {
+          width: 1850px;
+        }
+
         .preview {
+          display: inline-block;
           width: 914px;
+          float: left;
         }
 
-        .console {
-          width: 100%;
-          border: 1px solid #ccc;
-          color: #222;
-          line-height: 15px;
-          padding: 5px;
-          margin: 5px 5px 0 5px;
-          font-size: 13px;
-
+        .source {
+          display: inline-block;
+          position: fixed;
+          top: 80px;
+          left: 914px;
+          width: 914px;
+          height: 100%;
+          float: left;
+          border: none;
+          outline: none;
         }
+
       </style>
 
   </head>
   <body>
 
-    <textarea class="source"></textarea>
-    <div class="preview"></div>
+    <div>
+      <div class="preview"></div>
+      <textarea class="source" id="source"></textarea>      
+    </div>
+
+
 
     <script type="text/javascript" src="javascripts/vendor/marked.js"></script>
     <script type="text/javascript" src="javascripts/vendor/json.prune.js"></script>
     <script type="text/javascript" src="javascripts/vendor/jquery.js"></script>
+    <script type="text/javascript" src="javascripts/vendor/jquery.hotkeys.js"></script>
     <script type="text/javascript" src="javascripts/vendor/underscore.js"></script>
     <script type="text/javascript" src="javascripts/vendor/backbone.js"></script>
 
     <script type="text/javascript" src="jacket.js"></script>
 
     <script type="text/javascript">
+
+      function ClBrd(text){
+      if (window.clipboardData){window.clipboardData.setData("Text", text);alert ("Нужная строка добавлена в буфер обмена.");}
+      else {var DummyVariable = prompt('copy', text)}
+      }
+
+      $('#source').bind('keypress', function(e) {
+        if (e.ctrlKey && e.keyCode == 3) {
+            var source = document.getElementById("source")
+            text = '"' + source.value.substring(source.selectionStart, source.selectionEnd).replace(/\n/g, '",\n    "') + '"';
+            ClBrd(text);
+        }
+      });
+
+      window.onbeforeunload = function(){
+        if (window.changed) {
+          return 'Do you save your chages?';
+        } else {
+          true
+        }
+      }
+
       Jacket.config.throw_errors = false;
 
       window.log = function() {
@@ -101,9 +136,16 @@
       window.$$ = function() {       
         var args = Array.prototype.slice.call(arguments);
         var output = '\n' + args.join('\n') + '\n';
-        $('.preview').append(marked(output));
-        $('.source').val( $('.source').val() + output );
+        $('.source').text( $('.source').val() + output ).val($('.source').val() + output).triggerHandler('change');
       }
+
+      $('.source').on('keyup', function(){
+        window.changed = true;
+      });
+
+      $('.source').on('keyup change', function(e){
+        $('.preview').html( marked($('.source').val()) );
+      });
 
     </script>
 

@@ -1,6 +1,4 @@
-example("function",
-
-function() {
+example("function", function() {
   
 });
 
