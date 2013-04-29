@@ -1,4 +1,4 @@
-example( 'anonymous', function() {
+$$(function() {
 
   window.view = J('Jacket.View', Backbone.View, {
     el: '.test',

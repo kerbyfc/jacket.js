@@ -3,32 +3,32 @@
   <head>
 
       <link rel="stylesheet" href="stylesheets/vendor/markdown.css" />
-      <link rel="stylesheet" href="stylesheets/vendor/github.css" />
-
       <title>Jacket examples</title>
 
       <style>
 
         body {
-          width: 1850px;
+          padding: 0;
+          margin: 0;
         }
 
-        .preview {
-          display: inline-block;
-          width: 914px;
-          float: left;
-        }
-
-        .source {
-          display: inline-block;
+        #source {
+          right: 0;
+          display: block;
           position: fixed;
-          top: 80px;
-          left: 914px;
-          width: 914px;
+          top: 0px;
+          padding: 5px;
+          margin: 0px;
+          width: 800px;
           height: 100%;
-          float: left;
-          border: none;
-          outline: none;
+          background: #ffffff;
+          z-index: 10;
+        }
+
+        #preview {
+          display: block;
+          width: 914px;
+          margin: 20px;
         }
 
       </style>
@@ -36,188 +36,95 @@
   </head>
   <body>
 
-    <div>
-      <div class="preview"></div>
-      <textarea class="source" id="source"></textarea>      
-    </div>
-
-
+    <textarea id="source"></textarea>   
+    <div id="preview"></div>
 
     <script type="text/javascript" src="javascripts/vendor/marked.js"></script>
     <script type="text/javascript" src="javascripts/vendor/json.prune.js"></script>
     <script type="text/javascript" src="javascripts/vendor/jquery.js"></script>
-    <script type="text/javascript" src="javascripts/vendor/jquery.hotkeys.js"></script>
     <script type="text/javascript" src="javascripts/vendor/underscore.js"></script>
     <script type="text/javascript" src="javascripts/vendor/backbone.js"></script>
-
     <script type="text/javascript" src="jacket.js"></script>
 
+    <script type="text/javascript" src="javascripts/readme_gen.js"></script>
     <script type="text/javascript">
-
-      function ClBrd(text){
-      if (window.clipboardData){window.clipboardData.setData("Text", text);alert ("Нужная строка добавлена в буфер обмена.");}
-      else {var DummyVariable = prompt('copy', text)}
-      }
-
-      $('#source').bind('keypress', function(e) {
-        if (e.ctrlKey && e.keyCode == 3) {
-            var source = document.getElementById("source")
-            text = '"' + source.value.substring(source.selectionStart, source.selectionEnd).replace(/\n/g, '",\n    "') + '"';
-            ClBrd(text);
-        }
-      });
-
-      window.onbeforeunload = function(){
-        if (window.changed) {
-          return 'Do you save your chages?';
-        } else {
-          true
-        }
-      }
 
       Jacket.config.throw_errors = false;
-
-      window.log = function() {
-
-        var non_comment = false;
-        if (arguments.length) {
-          if (arguments[0] === 'non_comment') {
-            arguments = Array.prototype.slice.call(arguments, 1);
-            non_comment = true;
-          }
-        }
-
-        if (arguments.length) {
-          
-          var text = '\n';
-
-          for (var i in arguments) {
-            var res, txt = arguments[i];
-            try {
-              if ( (typeof txt).match(/object/i) ) {
-                res = JSON.prune(txt, 1)
-              } else {
-                res = txt.toString();
-              }
-            } catch (e) {
-              res = typeof txt;
-            }
-            text += res + ' ';
-          }
-
-          if (!non_comment) {
-            text = text.replace(/(\n)/g, '\n\/\/ ').replace(/-[\s]*[-]+/g, '');
-            console.log.apply(console, arguments);
-          }
-
-          window.log_text += text;
-        }
-      }
-
-      Jacket.log = window.log;
-      Jacket.err = window.log;
-
-      window.examples = {};
-
-      window.example = function(name, fn) {        
-        window.examples[name] = fn;        
-      }
-
-      window.run = function(example_name) {
-        fn = window.examples[example_name];        
-        window.log_text = '```javascript\n';
-        log("examples/" + window.example_group + '/' + name + '.js - - - - - - - - - - - - - - - - - - - - - -');
-        log('non_comment', '\n', fn.toString().slice(13, -1).replace(/\n  /g, '\n').replace(/\slog[\s]*\(/g, 'console.log('), '\n// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - \n');
-        fn.call(window);
-        window.log_text += '\n```';
-        $$(window.log_text.replace(/[\n]+[\s]*[\n]+/g, '\n\n'))
-      }
-
-      window.$$ = function() {       
-        var args = Array.prototype.slice.call(arguments);
-        var output = '\n' + args.join('\n') + '\n';
-        $('.source').text( $('.source').val() + output ).val($('.source').val() + output).triggerHandler('change');
-      }
-
-      $('.source').on('keyup', function(){
-        window.changed = true;
-      });
-
-      $('.source').on('keyup change', function(e){
-        $('.preview').html( marked($('.source').val()) );
-      });
-
-    </script>
-
-    <div class="test"></div>
-
-    <script type="text/javascript">example_group = 'wrapping';</script>
-    <script type="text/javascript" src="examples/wrapping/function.js"></script>
-    <script type="text/javascript" src="examples/wrapping/anonymous.js"></script>
-    <script type="text/javascript" src="examples/wrapping/singleton.js"></script>
-    <script type="text/javascript" src="examples/wrapping/coffeeclass.js"></script>
-    <script type="text/javascript" src="examples/wrapping/backbone.js"></script>
-
-    <script type="text/javascript">example_group = 'handling';</script>
-    <script type="text/javascript" src="examples/handling/errors.js"></script>
-    <script type="text/javascript" src="examples/handling/callstack.js"></script>
-    <script type="text/javascript" src="examples/handling/stacktrace.js"></script>
-    <script type="text/javascript" src="examples/handling/debugger.js"></script>
-    <script type="text/javascript" src="examples/handling/notifier.js"></script>
-    <script type="text/javascript" src="examples/handling/additional.js"></script>
-
-    <script type="text/javascript">example_group = 'features';</script>
-    <script type="text/javascript" src="examples/features/renaming.js"></script>
-    <script type="text/javascript" src="examples/features/callbacks.js"></script>
-    <script type="text/javascript" src="examples/features/protecting.js"></script>
-
-    <script type="text/javascript">
     
-    $$(
-      'Jacket.js',
-      '=========', '',
-      '  **Let`s dress up your code with <i>Jackets</i>**'
-    );
+      $$(
+        'Jacket.js',
+        '=========', '',
+        '  **Let`s dress up your code with <i>Jackets</i>**'
+      );
 
+      $$(
+        '1. [Conception](#1-conception)',
+         '<br/>1.1 [Pros & cons](#11-pros--cons)',
+        '2. [Basic Usage](#2-basic-usage)',
+         '<br/>2.1. [Functions](#21-functions)',
+         '<br/>2.2. [Singletons](#22-singletons)',
+         '<br/>2.3. [Coffescript classes](#23-coffeescript-classes)',
+         '<br/>2.4. [Backbone extensions](#24-backbone-extensions)',
+        '3. [Error handling](#3-error-handling)',
+         '<br/>3.1. [Out of the box](#31-out-of-the-box)',
+         '<br/>3.2. [Configuring](#32-configuring)',
+         '<br/>3.3. [Writing own handler](#33-writing-own-handler)',
+        '4. [Additional features](#4-additional-features)',
+         '<br/>4.1. [Callbacks](#41-callbacks)',
+         '<br/>4.2. [Methods` protection](#42-methods-protection)'
+      );
 
-    $$(
-      '1. [Conception](#1-conception)',
-       '<br/>1.1 [Pros & cons](#11-pros--cons)',
-      '2. [Basic Usage](#2-basic-usage)',
-       '<br/>2.1. [Functions](#21-functions)',
-       '<br/>2.2. [Singletons](#22-singletons)',
-       '<br/>2.3. [Coffescript classes](#23-coffeescript-classes)',
-       '<br/>2.4. [Backbone extensions](#24-backbone-extensions)',
-      '3. [Error handling](#3-error-handling)',
-       '<br/>3.1. [Out of the box](#31-out-of-the-box)',
-       '<br/>3.2. [Configuring](#32-configuring)',
-       '<br/>3.3. [Writing own handler](#33-writing-own-handler)',
-      '4. [Additional features](#4-additional-features)',
-       '<br/>4.1. [Callbacks](#41-callbacks)',
-       '<br/>4.2. [Methods` protection](#42-methods-protection)'
-    );
+      $$(
+        '#### 1. Conception',
+        '',
+        'Ask yourself: ',
+        '"How much i need of getting stack trace when an error occurs on client side?".',
+        'I want it badly, especially in production.',
+        '<br/>If you think too, I suppose that jacket - is what you need.',
+        '',
+        'However, you can handle stack trace only by "try & catch" construction, because window.onerror handler does not provide that.',
+        '',
+        '* And what you might to do in this case?<br/>',
+        '* How to rid yourself from this boring work?', 
+        '* How to speed up searching of code mistakes?', 
+        '* Is there any way of easy code` wrapping?',
+        '',
+        'Actual questions, aren`t they?'
+      );
 
-    $$('#### 1. Conception');
+      $$(
+        '##### 1.1. Pros & cons',
+        '',
+        '<table>',
+        '<thead><tr><th>pros</th><th>cons</th></tr></thead>' +
+          '<tbody><tr>' +
+          '<td>' +
+          '  1. Easy error handling without manual try/catch construction embedding.',
+            '<br/>2. More readable stacktraces and error messages help to find errors faster.',
+            '<br/>3. Send stacktrace, callstack, event log, exception message and another helpful data to server.',
+            '<br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique.',
+            '<br/>4. Perfectly approaches to event-driven architecture.',
+            '<br/>5. Prevention of script execution stopping, if it needed.' + 
+          '</td>' + 
+          '<td valign="top">' + 
+            '1. You should change your code (a little) if it exists' + 
+          '</td>' + 
+          '</tr></tbody>' + 
+        '</table>'
+      );
 
-    $$(
-      'Ask yourself: ',
-      '"How much i need of getting stack trace when an error occurs on client side?".',
-      'I want it badly, especially in production.',
-      '<br/>If you think too, I suppose that jacket - is what you need.'
-    );
+      $$(
+        '#### 2. Basic Usage',
+        'Suppose you have a function, that throws an exception:'
+      );
 
-    $$(
-      'However, you can handle stack trace only by "try & catch" construction, because window.onerror handler does not provide that.'
-    );
-
-    $$(
-      '',
-      '* And what you might to do in this case?<br/>',
-      '* How to rid yourself from this boring work?', 
-      '* How to speed up searching of code mistakes?', 
-      '* Is there any way of easy code` wrapping?',
-      ''
-    )
+      $$(function() {
+        var fn = function () {
+          return _undefined;
+        }
+        fn();
+      });
+        
 
     </script>
 
@@ -226,36 +133,7 @@
 
 
 
-     
-      * And what you might to do in this case? 
-      * How to rid yourself from this boring work?
-      * How to speed up searching of code mistakes?
-      * Is there any way of easy code' wrapping?
 
-      Actual questions, aren't they?
-
-      ##### 1.1. Pros & cons
-
-      <table width="100%">
-        <thead><tr><th>pros</th><th>cons</th></tr></thead>
-        <tbody><tr>
-        <td>
-        
-          1. Easy error handling without manual try/catch construction embedding.
-          <br/>2. More readable stacktraces and error messages help to find errors faster.
-          <br/>3. Send stacktrace, callstack, event log, exception message and another helpful data to server.
-          <br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique.
-          <br/>4. Perfectly approaches to event-driven architecture.
-          <br/>5. Prevention of script execution stopping, if it needed.
-        
-        </td>
-        <td valign="top">
-        
-          1. You should change your code (a little) if it exists
-        
-        </td>
-        </tr></tbody>
-      </table>
 
       #### 2. Basic Usage
 
@@ -469,7 +347,12 @@
 
     <link rel="stylesheet" href="../stylesheets/vendor/github.css">
     <script src="../javascripts/vendor/highlight.pack.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
+    <script>
+      run();
+    </script>
+
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+    <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
   </body>
 </html>
