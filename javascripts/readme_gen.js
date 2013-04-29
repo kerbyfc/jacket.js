@@ -49,7 +49,12 @@ Jacket.log = window.log;
 Jacket.err = window.log;
 
 window.text = function(txt) {
-  $('#source').val( $('#source').val() + txt );
+  $('#source').val( $('#source').val() + txt.replace(/([\#\#]+[\s]+)(.*[\n]+)/g, function(a, b){
+    console.log(arguments);
+    var name = $.trim(arguments[2]).replace(/([\s]+)/g, '-').replace(/[\.|\&]/g, '').toLowerCase();
+      return arguments[1] + '<a name="' + name + '" class="anchor" href="#' + name + '"></a>' + arguments[2];
+    })
+  );
 };
 
 window.code = function(fn) {
