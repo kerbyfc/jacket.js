@@ -239,8 +239,17 @@ function convert(){
 
   application.isRendering = true;
   // save CodeMirror to textarea
+  
   application.editor.save();
+
   application.md = $("#in").val();
+
+  application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code) {
+    window.logs = '';
+    window.eval.call(window, code);
+    return str + window.logs;
+  });
+
   application.db.setItem("#in",application.md);
 
   // hide html
@@ -260,50 +269,37 @@ function convert(){
   switch (application.converter) {
     case "githubAPI":
       // call github's API
-      // $.ajax({
-      //   "url":"https://api.github.com/markdown/raw",
-      //   "type":"POST",
-      //   "contentType":"text/plain",
-      //   "data":application.md,
-      //   "complete":function(jqXHR, textStatus){
-      //     // api limit count
-      //     application.apiLimit = jqXHR.getResponseHeader("X-RateLimit-Remaining");
-      //     if (application.apiLimit < 50) {
-      //       showAlert("X-RateLimit-Remaining is less than 50. It was limited 5000 request per hour from same IP");
-      //     }
-      //   }
-      // })
-      // .done(function(data){
-      //   // console.log("done");
-      //   // render html data
-      //   convertCallback(data,function(){
-      //   // $("#out").addClass("markdown-body");
-      //   });
-      // })
-      // .fail(function(data){
-      //   // console.log("fail");
-      //   showAlert("failed to ajax request. Try again.");
-      // })
-      // .always(function(data){
-      //   // console.log("always");
-      //   application.isRendering = false;
-      // });
+      $.ajax({
+        "url":"https://api.github.com/markdown/raw",
+        "type":"POST",
+        "contentType":"text/plain",
+        "data":application.md,
+        "complete":function(jqXHR, textStatus){
+          // api limit count
+          application.apiLimit = jqXHR.getResponseHeader("X-RateLimit-Remaining");
+          if (application.apiLimit < 50) {
+            showAlert("X-RateLimit-Remaining is less than 50. It was limited 5000 request per hour from same IP");
+          }
+        }
+      })
+      .done(function(data){
+        // console.log("done");
+        // render html data
+        convertCallback(data,function(){
+        // $("#out").addClass("markdown-body");
+        });
+      })
+      .fail(function(data){
+        // console.log("fail");
+        showAlert("failed to ajax request. Try again.");
+      })
+      .always(function(data){
+        // console.log("always");
+        application.isRendering = false;
+      });
     break;
     case "marked":
       // user marked.js
-
-      console.log('here', application.md);
-
-      var blocks = application.md.match(/(```javascript)([^`]+)(`)+/g);
-
-      console.log(blocks);
-
-      for (var i in blocks) {
-        var block = blocks[i].replace(/```javascript/im, '').replace(/```/m, '');
-        console.log(block);
-        eval.call(window, block);
-      }
-
       var data = marked(application.md);
       convertCallback(data,function(){
         // $("#out").removeClass("markdown-body");
