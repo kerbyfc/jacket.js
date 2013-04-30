@@ -227,7 +227,42 @@ function autoReload(){
   }
 }
 
+window.log = function() {
 
+  var non_comment = false;
+  if (arguments.length) {
+    if (arguments[0] === 'non_comment') {
+      arguments = Array.prototype.slice.call(arguments, 1);
+      non_comment = true;
+    }
+  }
+
+  if (arguments.length) {
+    
+    var text = '\n';
+
+    for (var i in arguments) {
+      var res, txt = arguments[i];
+      try {
+        if ( (typeof txt).match(/object/i) ) {
+          res = JSON.prune(txt, 1);
+        } else {
+          res = txt.toString();
+        }
+      } catch (e) {
+        res = typeof txt;
+      }
+      text += res + ' ';
+    }
+
+    if (!non_comment) {
+      text = text.replace(/(\n)/g, '\n\/\/ ').replace(/-[\s]*[-]+/g, '');
+      console.log.apply(console, arguments);
+    }
+
+    window.logs += text;
+  }
+};
 
 // convert markdown to html
 function convert(){
@@ -246,7 +281,11 @@ function convert(){
 
   application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code) {
     window.logs = '';
-    window.eval.call(window, code);
+    try {
+      window.eval.call(window, code.replace(/\bconsole.log/g, 'log'));  
+    } catch (e) {
+      console.error(e.message);
+    }
     return str + window.logs;
   });
 
