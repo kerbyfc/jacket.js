@@ -48,24 +48,19 @@
         <label class="checkbox"><input type="checkbox" id="enableShortcut"> Enable Shortcut Key</label>
       </form>
       <form id="menu4">
-        <label class="radio"><input type="radio" name="optionsConverter" id="optionsConverter1" value="githubAPI">&nbsp;Use Github API for converter</label>
-        <label class="radio"><input type="radio" name="optionsConverter" id="optionsConverter2" value="marked" checked>&nbsp;Use <a href="https://github.com/chjj/marked">marked</a> for conveter</label>
+        <label class="radio"><input type="radio" name="optionsConverter" id="optionsConverter1" value="githubAPI" checked>&nbsp;Use Github API for converter</label>
+        <label class="radio"><input type="radio" name="optionsConverter" id="optionsConverter2" value="marked">&nbsp;Use <a href="https://github.com/chjj/marked">marked</a> for conveter</label>
       </form>
       <div class="clear"></div>
     </div>
   </div>
-  <a id="githubribbon" href="https://github.com/georgeosddev/markdown-edit" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;z-index: 1040" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
   </header><!-- /header -->
   <section id="main">
     <div id="alertMessage" class="alert alert-block fade out display-none">
       <a class="close" data-dismiss="alert" href="#">&times;</a>
       <p></p>
     </div>
-    <textarea id="in">
-
-
-
-    </textarea>
+    <textarea id="in"></textarea>
     <div id="out" class="markdown-body"></div><!-- /converted html will be here -->
     <div class="clear"></div>
   </section>
@@ -79,8 +74,10 @@
   <script src="vendor/codemirror-2.34/mode/gfm/gfm.js"></script>
   <script src="vendor/codemirror-2.34/mode/javascript/javascript.js"></script>
   <script src="vendor/marked/marked.js"></script>
+  <script src="vendor/json.prune.js"></script>
   <script src="vendor/highlight.js/highlight.pack.js"></script>
   <script src="javascript/scrollTop.js"></script>
+  <script src="../jacket.js"></script>
   <script src="javascript/app.js"></script>
 
   <script type="text/javascript">

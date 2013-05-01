@@ -2,13 +2,14 @@
 window.application = {
   editor:"",
   apiLimit:1500,
-  enabeAutoReload:false,
-  enableShortcut:false,
+  enabeAutoReload:true,
+  enableShortcut:true,
   md:"",
   viewer:"",
   db:localStorage,
   converter:"marked", // default converter is `marked`
-  isRendering:false
+  isRendering:false,
+  converter: "githubAPI"
 };
 window.URL = window.URL || window.webkitURL;
 
@@ -110,6 +111,7 @@ $(function(){
     mode: 'gfm',// github-flavored-markdown
     lineNumbers: true,
     matchBrackets: true,
+    tabSize: 2,
     theme: "default",
     onFocus:function(){
       $(".CodeMirror-scroll").addClass("focus");
@@ -120,6 +122,18 @@ $(function(){
     onCursorActivity: function() {
       application.editor.setLineClass(hlLine, null, null);
       hlLine = application.editor.setLineClass(application.editor.getCursor().line, null, "activeline");
+    },
+    extraKeys: {
+      Tab: function(cm) {
+        if (cm.getSelection().length) {
+          CodeMirror.commands.indentMore(cm);
+        } else { 
+          cm.replaceSelection("  ", "end");
+        }
+      },
+      'Shift-Tab': function() {
+        CodeMirror.commands.indentLess(cm);
+      }
     }
   });
   var hlLine = application.editor.setLineClass(0, "activeline");
@@ -229,14 +243,6 @@ function autoReload(){
 
 window.log = function() {
 
-  var non_comment = false;
-  if (arguments.length) {
-    if (arguments[0] === 'non_comment') {
-      arguments = Array.prototype.slice.call(arguments, 1);
-      non_comment = true;
-    }
-  }
-
   if (arguments.length) {
     
     var text = '\n';
@@ -255,14 +261,17 @@ window.log = function() {
       text += res + ' ';
     }
 
-    if (!non_comment) {
-      text = text.replace(/(\n)/g, '\n\/\/ ').replace(/-[\s]*[-]+/g, '');
-      console.log.apply(console, arguments);
-    }
-
+    text = text.replace(/(\n)/g, '\n   ').replace(/-[\s]*[-]+/g, '');
+    console.log.apply(console, arguments);
+  
     window.logs += text;
   }
 };
+
+if (typeof Jacket !== 'undefined') {
+  Jacket.log = window.log;
+  Jacket.err = window.log;
+}
 
 // convert markdown to html
 function convert(){
@@ -279,17 +288,17 @@ function convert(){
 
   application.md = $("#in").val();
 
-  application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code) {
+  application.db.setItem("#in",application.md);
+
+  application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code, post) {
     window.logs = '';
     try {
-      window.eval.call(window, code.replace(/\bconsole.log/g, 'log'));  
+      window.eval.call(window, code.replace(/console.log/, 'window.log') );  
     } catch (e) {
-      console.error(e.message);
+      log(e.message);
     }
-    return str + window.logs;
+    return pre + code + ( window.logs.length ? '/* console: ' + window.logs + '\n*\/\n' : '' ) + '```';
   });
-
-  application.db.setItem("#in",application.md);
 
   // hide html
   $("#out").fadeOut("fast").empty();
