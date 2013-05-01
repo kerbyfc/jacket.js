@@ -235,7 +235,7 @@ function autoReload(){
     setTimeout(function(){
       if (application.cachedMD != application.editor.getValue()) convert();
       autoReload();
-    },5000);
+    },10000);
   }
 }
 
@@ -271,6 +271,7 @@ window.log = function() {
 if (typeof Jacket !== 'undefined') {
   Jacket.log = window.log;
   Jacket.err = window.log;
+  Jacket.config.throw_errors = false;
 }
 
 // convert markdown to html

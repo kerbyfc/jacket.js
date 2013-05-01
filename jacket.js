@@ -80,7 +80,7 @@
     Jacket.callstack = [];
 
     Jacket.config = {
-      log_errors: true, log_stacktrace: true, log_callstack: true,
+      log_errors: true, log_stacktrace: true, log_callstack: false,
       use_debugger: false,
       throw_errors: true,
       notify_url: false,

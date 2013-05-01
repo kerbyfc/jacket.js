@@ -1,28 +1,7 @@
-```javascript
-window.bad = function(){ return _undefined; };
-```
-
-```javascript 
-bad();
-/* console: 
-   _undefined is not defined 
-*/
-```
-
-```javascript
-try { bad(); } catch (e) { log(e.message); }
-log('here');
-/* console: 
-   _undefined is not defined 
-   here 
-*/
-```
-
-
 Jacket.js
 =========
 
-  **Let's dress up your code with <i>Jackets</i>**
+  **Let's dress up your code with Jackets**
 
 1. [Conception](#1-conception)
  <br/>1.1 [Pros & cons](#11-pros--cons)
@@ -42,12 +21,16 @@ Jacket.js
 #### 1. Conception
 
 Ask yourself: 
-"How much i need of getting stack trace when an error occurs on client side?". 
+"How much i need of getting stack 
+trace when an error occurs on client side?". 
 I want it badly, especially in production.
-<br/>If you think too, I suppose that jacket - is what you need.
+<br/>If you think too, I suppose that jacket - 
+is what you need.
 
-However, you can handle stack trace only by "try & catch" construction,
-because window.onerror handler does not provide that.
+However, you can handle stack 
+trace only by "try & catch" construction,
+because window.onerror handler 
+does not provide that.
 
 * And what you might to do in this case? 
 * How to rid yourself from this boring work?
@@ -63,17 +46,26 @@ Actual questions, aren't they?
   <tbody><tr>
   <td>
   
-    1. Easy error handling without manual try/catch construction embedding.
-    <br/>2. More readable stacktraces and error messages help to find errors faster.
-    <br/>3. Send stacktrace, callstack, event log, exception message and another helpful data to server.
-    <br/>3. Global and specific callbacks provide an opportunity to implement "hooks" technique.
-    <br/>4. Perfectly approaches to event-driven architecture.
-    <br/>5. Prevention of script execution stopping, if it needed.
+    1. Easy error handling without manual 
+    try/catch construction embedding.
+    <br/>2. More readable stacktraces 
+    and error messages help to find errors faster.
+    <br/>3. Send stacktrace, callstack, 
+    event log, exception message and 
+    another helpful data to server.
+    <br/>3. Global and specific callbacks 
+    provide an opportunity to 
+    implement "hooks" technique.
+    <br/>4. Perfectly approaches 
+    to event-driven architecture.
+    <br/>5. Prevention of script 
+    execution stopping, if it needed.
   
   </td>
   <td valign="top">
   
-    1. You should change your code (a little) if it exists
+    1. You should change your 
+    code (a little) if it exists
   
   </td>
   </tr></tbody>
@@ -81,22 +73,28 @@ Actual questions, aren't they?
 
 #### 2. Basic Usage
 
-Suppose you have a function, that throws an exception:
+Suppose you have a "bad" 
+function, that throws 
+an exception:
 ```javascript
-var fn = function () {
-  return _undefined;
-}
-fn();
+window.bad = function(){ return _undefined; };
+```
+
+And when you call it, 
+the script execution stops:
+```javascript
+bad();
+log('here');
 /* console: 
    _undefined is not defined 
 */
 ```
 
-To get stack trace you might handle error by this way: 
-
+To get stack trace you might 
+handle error by this way: 
 ```javascript
-var handler = function(err) { /* notify your server about this error */ }
-var fn = function () {
+window.handler = function(e) { /* get e.stack */ }
+bad = function () {
   try {
     return _undefined;
   } catch (e) {
@@ -105,9 +103,27 @@ var fn = function () {
 }
 ```
 
-However, in this case you have a one function call, that supposed to be handled. 
-In case you need to handle and notify your server about all exceptions, 
-raised by you client side application, you must have an easy way of code' wrapping.  
+By this way you can prevent of script 
+execution stopping and post error
+information to your server if you need
+```javascript
+bad();
+log('here');
+/* console: 
+   here 
+*/
+```
+
+However, in this case 
+you have a one function 
+call, that supposed to be handled. 
+In case you need to handle 
+and notify your server 
+about all exceptions, 
+raised by you client side 
+application, you must 
+have an easy way 
+of code' wrapping.  
 ##### Jacket.js makes it real!
 
 Javascript
@@ -118,40 +134,57 @@ var fn = Jacket(function () {
 });
 /* then I'll use J instead of Jacket for convenience */
 ```
-Coffeescript
+using Coffeescript
 ```coffeescript
 J -> 
  _undefined
 ```
  
 ##### Which type of objects can we wrap?
-Jacket.js is able to wrap classes, functions and objects. 
-After exception handling, it will be thrown on and the script 
+Jacket.js is able to wrap 
+classes, functions and objects. 
+After exception handling, 
+it will be thrown on and the script 
 execution will be stopped by default. 
 
 ##### 2.1. Functions
 ```javascript
 function sum(a, b) {
-  if (!b) b = _undefined; /* this will raise an exception */
-  this.result = a + b;
-  return this.result;
+  if (b == null) b = _undefined; /* this will raise an exception */
+  this.result = a + b; return this.result;
 }
-
-J(sum)(1, 1);             // 2
-new J(sum)(1, 1);         // Object {result: 2}
-
-J(sum)('oops!');          // sum constructor : _undefined is not defined
-                          //  - at http://localhost:8080/:68:25
-                              
-console.log('I/* console: 
-   Unexpected token ILLEGAL 
-*/
-```m here');  /* will not be executed, because exception will be raised
-                             Setup negative Jacket.config.throw_errors 
-                             value to avoid script execution stopping
-                             and you'll see "I`m here" in your console. */
-
 ```
+
+You can call it, or instantiate it
+```javascript
+console.log(  
+  J(sum)(1, 1),
+  new J(sum)(1, 1)
+)
+/* console: 
+   sum.constructor : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
+    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3) 
+   undefined {} 
+*/
+```
+
+This call will raise an exception
+```javascript
+J(sum)('oops!'); 
+/* console: 
+   sum.constructor : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
+    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3)
+    - at k (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:16920) 
+*/
+```
+
+
 Lets play with anonymous functions
 ```javascript
 var anonymous = function(msg) {
@@ -165,14 +198,12 @@ J(anonymous)();
 //  - at wrapper (http://localhost:8080/jacket.js:470:50)
 //  - at http://localhost:8080/:80:21
 /* console: 
-   Anonymous9.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:295:19
+   Anonymous6.constructor : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
     - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:292:35)
-    - at handleOnClick (http://localhost:8080/markdown-edit/javascript/app.js:178:7)
-    - at HTMLButtonElement.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:41:7) 
-   [] 
-   _undefined is not defined 
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
+    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3)
+    - at k (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:16920) 
 */
 ```
 
@@ -248,11 +279,20 @@ new J(_Class)('call defInConst inside constructor')
 /* console: 
    undefined 
    _Class.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:295:19
+    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
     - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:292:35) 
-   [] 
-   _undefined is not defined 
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35) 
+   _Class.defInConst : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
+    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3)
+    - at k (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:16920)
+    - at Object.l.fireWith [as resolveWith] (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:17707) 
+   _Class.constructor : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35) 
 */
 ```
 
@@ -311,14 +351,6 @@ J(function my(a){return a+1;}, function(scope, name, method, args, result) {
 /* WILL OUTPUT TO CONSOLE */
 ['[Object object]', 'my', 'constructor', [1], 2]
 /* console: 
-   my.constructor : result is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:295:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:292:35)
-    - at handleOnClick (http://localhost:8080/markdown-edit/javascript/app.js:178:7)
-    - at HTMLButtonElement.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:41:7)
-    - at HTMLButtonElement.p.event.dispatch (http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js:2:38007) 
-   [] 
-   result is not defined 
+   {"0":"my","1":"constructor","2":Object,"3":2} 
 */
 ```
