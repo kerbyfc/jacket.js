@@ -42,17 +42,16 @@ $(function(){
     });
   });
 
-  // checkbox binding
-  $("#autoReload").change(function() {
-    application.enabeAutoReload = ($(this).attr("checked") === "checked");
-    autoReload();
-  });
+  // // checkbox binding
+  // $("#autoReload").change(function() {
+  //   application.enabeAutoReload = ($(this).attr("checked") === "checked");
+  //   autoReload();
+  // });
 
-  // checkbox binding
-  $("#enableShortcut").change(function() {
-    application.enableShortcut = ($(this).attr("checked") === "checked");
-  }); 
-
+  // // checkbox binding
+  // $("#enableShortcut").change(function() {
+  //   application.enableShortcut = ($(this).attr("checked") === "checked");
+  // }); 
 
   // checkbox binding
   $('[name="optionsConverter"]').change(function() {
@@ -184,8 +183,7 @@ function handleOnClick(id){
 }
 
 function saveFile() {
-  markdown = application.editor.getValue();
-  console.log('save');
+  $.post('/save', {raw: application.editor.getValue(), md: application.md});
 }
 
 // read local file
@@ -235,11 +233,13 @@ function viewRaw(file){
 function autoReload(){
   if (application.enabeAutoReload){
     setTimeout(function(){
-      if (application.md != application.editor.getValue()) convert();
+      if (application.cachedMD != application.editor.getValue()) convert();
       autoReload();
     },5000);
   }
 }
+
+autoReload();
 
 window.log = function() {
 
@@ -274,7 +274,7 @@ if (typeof Jacket !== 'undefined') {
 }
 
 // convert markdown to html
-function convert(){
+function convert(force){
 
   $("#alertMessage").alert("close");
 
@@ -287,6 +287,8 @@ function convert(){
   application.editor.save();
 
   application.md = $("#in").val();
+
+  application.cachedMD = application.md;
 
   application.db.setItem("#in",application.md);
 
@@ -314,6 +316,20 @@ function convert(){
     if(application.viewer) application.viewer.location.reload();
   };
 
+  if(force) {
+
+    application.converter = force;
+
+  } else {
+
+    if (navigator.onLine){
+      application.converter = 'githubAPI';
+    } else {
+      application.converter = 'marked';
+    }
+
+  }
+
   switch (application.converter) {
     case "githubAPI":
       // call github's API
@@ -328,6 +344,9 @@ function convert(){
           if (application.apiLimit < 50) {
             showAlert("X-RateLimit-Remaining is less than 50. It was limited 5000 request per hour from same IP");
           }
+          if (application.apiLimit < 1) {
+            convert('marked');
+          }
         }
       })
       .done(function(data){
@@ -340,6 +359,8 @@ function convert(){
       .fail(function(data){
         // console.log("fail");
         showAlert("failed to ajax request. Try again.");
+        application.converter = 'marked';
+        convert();
       })
       .always(function(data){
         // console.log("always");
@@ -351,7 +372,9 @@ function convert(){
       var data = marked(application.md);
       convertCallback(data,function(){
         // $("#out").removeClass("markdown-body");
-        $('#out pre code').each(function(i, e) {hljs.highlightBlock(e)});
+        $('#out pre code').each(function(i, e) {
+          $(e).addClass('javascript').html( hljs.highlight('javascript', $(e).html() ).value );
+        });
       });
     break;
     default:

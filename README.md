@@ -1,3 +1,24 @@
+```javascript
+window.bad = function(){ return _undefined; };
+```
+
+```javascript 
+bad();
+/* console: 
+   _undefined is not defined 
+*/
+```
+
+```javascript
+try { bad(); } catch (e) { log(e.message); }
+log('here');
+/* console: 
+   _undefined is not defined 
+   here 
+*/
+```
+
+
 Jacket.js
 =========
 
@@ -66,6 +87,9 @@ var fn = function () {
   return _undefined;
 }
 fn();
+/* console: 
+   _undefined is not defined 
+*/
 ```
 
 To get stack trace you might handle error by this way: 
@@ -119,7 +143,10 @@ new J(sum)(1, 1);         // Object {result: 2}
 J(sum)('oops!');          // sum constructor : _undefined is not defined
                           //  - at http://localhost:8080/:68:25
                               
-console.log('I`m here');  /* will not be executed, because exception will be raised
+console.log('I/* console: 
+   Unexpected token ILLEGAL 
+*/
+```m here');  /* will not be executed, because exception will be raised
                              Setup negative Jacket.config.throw_errors 
                              value to avoid script execution stopping
                              and you'll see "I`m here" in your console. */
@@ -137,6 +164,16 @@ J(anonymous)();
 //  - at anonymous (http://localhost:8080/:77:46)
 //  - at wrapper (http://localhost:8080/jacket.js:470:50)
 //  - at http://localhost:8080/:80:21
+/* console: 
+   Anonymous9.constructor : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:295:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:292:35)
+    - at handleOnClick (http://localhost:8080/markdown-edit/javascript/app.js:178:7)
+    - at HTMLButtonElement.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:41:7) 
+   [] 
+   _undefined is not defined 
+*/
 ```
 
 As you can see, error message was modified and anonymous function was presented as "anonymous4". 
@@ -162,7 +199,10 @@ function NamedFunction(msg) {
       e.message = ( _wrapper.origin.name + " constructor : " + e.message); Jacket.handle(e);  
     }
  
-    // oh-ho-how... Can we wrap functions` own methods, created in constructor? That's it. 
+    // oh-ho-how... Can we wrap functions/* console: 
+   Unexpected end of input 
+*/
+``` own methods, created in constructor? That's it. 
     var _self = this; _.each(this, function (val, key) {
       _self[key] = _wrapper.wrap(key, val);
     });
@@ -205,6 +245,15 @@ new J(_Class)('call defInConst inside constructor')
 // _Class constructor : _undefined is not defined
 //  - at http://localhost:8080/jacket.js:281:48
 //  - at http://localhost:8080/:96:22 
+/* console: 
+   undefined 
+   _Class.constructor : _undefined is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:295:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:292:35) 
+   [] 
+   _undefined is not defined 
+*/
 ```
 
 
@@ -261,4 +310,15 @@ J(function my(a){return a+1;}, function(scope, name, method, args, result) {
 })(1);
 /* WILL OUTPUT TO CONSOLE */
 ['[Object object]', 'my', 'constructor', [1], 2]
+/* console: 
+   my.constructor : result is not defined 
+    - at http://localhost:8080/markdown-edit/javascript/app.js:295:19
+    - at String.replace (native)
+    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:292:35)
+    - at handleOnClick (http://localhost:8080/markdown-edit/javascript/app.js:178:7)
+    - at HTMLButtonElement.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:41:7)
+    - at HTMLButtonElement.p.event.dispatch (http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js:2:38007) 
+   [] 
+   result is not defined 
+*/
 ```
