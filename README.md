@@ -93,7 +93,10 @@ log('here');
 To get stack trace you might 
 handle error by this way: 
 ```javascript
-window.handler = function(e) { /* get e.stack */ }
+window.handler = function(e) { 
+  console.log('catched: ' + e.message) 
+  /* get e.stack */
+}
 bad = function () {
   try {
     return _undefined;
@@ -110,6 +113,7 @@ information to your server if you need
 bad();
 log('here');
 /* console: 
+   catched: _undefined is not defined 
    here 
 */
 ```
@@ -126,18 +130,26 @@ have an easy way
 of code' wrapping.  
 ##### Jacket.js makes it real!
 
-Javascript
 ```javascript
-/* just dress it up :) */
-var fn = Jacket(function () {
+window.fn = Jacket(function () { // use "J" instead of "Jacket" for convenience
   return _undefined;
 });
-/* then I'll use J instead of Jacket for convenience */
 ```
+
 using Coffeescript
 ```coffeescript
-J -> 
+window.fn = J -> 
  _undefined
+```
+
+Call it
+```javascript
+fn();
+console.log("I'm alive!");
+/* console: 
+   Anonymous183.constructor : _undefined is not defined 
+   I'm alive! 
+*/
 ```
  
 ##### Which type of objects can we wrap?
@@ -150,24 +162,22 @@ execution will be stopped by default.
 ##### 2.1. Functions
 ```javascript
 function sum(a, b) {
-  if (b == null) b = _undefined; /* this will raise an exception */
-  this.result = a + b; return this.result;
+  if ( typeof(a) + typeof(b) !== 'numbernumber') {
+    throw Error('invalid arguments');
+  }
+  this.result = a + b; 
+  return this.result;
 }
 ```
 
 You can call it, or instantiate it
 ```javascript
-console.log(  
-  J(sum)(1, 1),
-  new J(sum)(1, 1)
-)
+console.log(
+  J(sum)(1,2),
+  new J(sum)(1,2)
+);
 /* console: 
-   sum.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
-    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3) 
-   undefined {} 
+   3 {"result":3} 
 */
 ```
 
@@ -175,12 +185,7 @@ This call will raise an exception
 ```javascript
 J(sum)('oops!'); 
 /* console: 
-   sum.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
-    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3)
-    - at k (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:16920) 
+   sum.constructor : invalid arguments 
 */
 ```
 
@@ -198,12 +203,7 @@ J(anonymous)();
 //  - at wrapper (http://localhost:8080/jacket.js:470:50)
 //  - at http://localhost:8080/:80:21
 /* console: 
-   Anonymous6.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
-    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3)
-    - at k (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:16920) 
+   Anonymous187.constructor : _undefined is not defined 
 */
 ```
 
@@ -278,21 +278,8 @@ new J(_Class)('call defInConst inside constructor')
 //  - at http://localhost:8080/:96:22 
 /* console: 
    undefined 
-   _Class.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35) 
    _Class.defInConst : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35)
-    - at HTMLDocument.<anonymous> (http://localhost:8080/markdown-edit/javascript/app.js:147:3)
-    - at k (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:16920)
-    - at Object.l.fireWith [as resolveWith] (http://localhost:8080/markdown-edit/vendor/jquery-1.8.2/jquery.min.js:2:17707) 
    _Class.constructor : _undefined is not defined 
-    - at http://localhost:8080/markdown-edit/javascript/app.js:299:19
-    - at String.replace (native)
-    - at convert (http://localhost:8080/markdown-edit/javascript/app.js:296:35) 
 */
 ```
 
@@ -351,6 +338,6 @@ J(function my(a){return a+1;}, function(scope, name, method, args, result) {
 /* WILL OUTPUT TO CONSOLE */
 ['[Object object]', 'my', 'constructor', [1], 2]
 /* console: 
-   {"0":"my","1":"constructor","2":Object,"3":2} 
+   {"0":"my","1":"constructor","2":Object} 
 */
 ```

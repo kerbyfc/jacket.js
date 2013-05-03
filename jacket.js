@@ -282,6 +282,14 @@
       
     };
 
+    Jacket.construct = function(constructor, args) {
+      var construct = function() {
+        return constructor.apply(this, args);
+      }
+      construct.prototype = constructor.prototype;
+      return new construct();
+    }
+
     Jacket.callback = null;
 
     function Jacket(fname, obj, extentions, methods, callback) {
@@ -321,11 +329,11 @@
 
       if (this instanceof Jacket) {
         return function() {
-          return (typeof obj === 'function') ? new obj(arguments) : obj;
+          return (typeof obj === 'function') ? Jacket.construct(obj, arguments) : obj;
         };
+      } else {
+        return obj;  
       }
-      
-      return obj;
       
     }
 
@@ -341,8 +349,6 @@
     Wearer.members = [];
 
     function Wearer(origin, extentions, callback, protected_methods, fname) {
-
-      console.log(arguments);
 
       var key, type = typeof origin,
         _this = this;
@@ -377,8 +383,8 @@
           // origin have non-emtpy name => this is class
           this.wrap_class();
         } else {
-          this.wrap_class();
-          // this.wrap_object_or_function();
+          // this.wrap_class();
+          this.wrap_object_or_function();
         }
 
         for (key in _this.origin) {
@@ -390,8 +396,6 @@
       } else {
         Jacket.handle(new Error('Only functions and objects can wear Jacket'));
       }
-
-      // console.log(this.wrapper);
 
       return this.wrapper;
 
@@ -446,19 +450,13 @@
 
       Jacket.wearers[id] = {scope: _wrapper, origin: this.origin};
 
-      console.log(' ------- ', this._constructor, this._constructor.__super__);
-
       this.cname = this.fname.substring(this.fname.lastIndexOf('.') + 1);
 
-      _class = "Jacket.wearers['" + id + "'].wrapper = " + ( this.fname !== this.cname ? this.fname + ' = ' : '') + "(function(_super, jacket) {\n\n  jacket.extend(" + this.cname + ", _super, jacket);\n  \n  " + this.cname + ".name = \"" + this.cname + "\";\n  \n  function " + this.cname + "() {\n\n    \n    " + ( this.extentions ?  "this.__super__ = jacket._constructor.__super__;" : "") +  "jacket.do_wraps(jacket.extentions, this);\n    jacket._constructor.apply(this, arguments);\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = jacket.wrap(key, val);\n    });\n\n  }\n\n  return " + this.cname + ";\n\n})(Jacket.wearers['" + id + "'].origin, Jacket.wearers['" + id + "'].scope);\n";
+      _class = "Jacket.wearers['" + id + "'].wrapper = " + ( this.fname !== this.cname ? this.fname + ' = ' : '') + "(function(_super, jacket) {\n\n  jacket.extend(" + this.cname + ", _super, jacket);\n  \n  " + this.cname + ".name = \"" + this.cname + "\";\n  \n  function " + this.cname + "() {\n\n    " + ( this.extentions ?  "this.__super__ = jacket._constructor.__super__;" : "") +  "jacket.do_wraps(jacket.extentions, this);\n    result = jacket._constructor.apply(this, Array.prototype.slice.call(arguments));\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = jacket.wrap(key, val);\n    });\n\n    return result;\n  }\n\n  return " + this.cname + ";\n\n})(Jacket.wearers['" + id + "'].origin, Jacket.wearers['" + id + "'].scope);\n";
       
-      console.log(_class);
-
       globalEval(_class);      
 
       this.wrapper = Jacket.wearers[id].wrapper;
-
-      console.log(this.wrapper);
 
       _.each(Object.getPrototypeOf(this.wrapper.prototype), function(val, key, proto) {
         if (_.has(proto, key)) {

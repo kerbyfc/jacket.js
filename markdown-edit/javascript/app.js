@@ -272,6 +272,7 @@ if (typeof Jacket !== 'undefined') {
   Jacket.log = window.log;
   Jacket.err = window.log;
   Jacket.config.throw_errors = false;
+  Jacket.config.log_stacktrace = false;
 }
 
 // convert markdown to html
