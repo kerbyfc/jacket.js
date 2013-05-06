@@ -21,6 +21,12 @@ var server = connect (
       res.writeHead(200, {'Content-Type': 'text/plain'});
       res.end('');
     });
+    app.post('example', function(req, res) {
+      console.log('save', req.body.filename, req.body.src);
+      fs.writeFileSync(req.body.filename, req.body.src);
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.end('');
+    })
   })
 
 );

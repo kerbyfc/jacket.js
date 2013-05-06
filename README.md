@@ -73,35 +73,35 @@ Actual questions, aren't they?
 
 #### 2. Basic Usage
 
+Before we start, let's create
+application namespace "ns" for example.
 Suppose you have a "bad" 
 function, that throws 
 an exception:
 ```javascript
-window.bad = function(){ return _undefined; };
+window.ns = {};
+ns.bad = function(){ return _undefined; };
 ```
 
 And when you call it, 
 the script execution stops:
 ```javascript
-bad();
+window.ns.bad();
 log('here');
-/* console: 
-   _undefined is not defined 
-*/
 ```
 
 To get stack trace you might 
 handle error by this way: 
 ```javascript
-window.handler = function(e) { 
+window.ns.handler = function(e) { 
   console.log('catched: ' + e.message) 
   /* get e.stack */
 }
-bad = function () {
+window.ns.bad = function () {
   try {
     return _undefined;
   } catch (e) {
-    handler(e);
+    window.ns.handler(e);
   }
 }
 ```
@@ -110,12 +110,8 @@ By this way you can prevent of script
 execution stopping and post error
 information to your server if you need
 ```javascript
-bad();
+window.ns.bad();
 log('here');
-/* console: 
-   catched: _undefined is not defined 
-   here 
-*/
 ```
 
 However, in this case 
@@ -138,18 +134,14 @@ window.fn = Jacket(function () { // use "J" instead of "Jacket" for convenience
 
 using Coffeescript
 ```coffeescript
-window.fn = J -> 
+window.ns.fn = J -> 
  _undefined
 ```
 
 Call it
 ```javascript
-fn();
+window.ns.fn();
 console.log("I'm alive!");
-/* console: 
-   Anonymous183.constructor : _undefined is not defined 
-   I'm alive! 
-*/
 ```
  
 ##### Which type of objects can we wrap?
@@ -161,9 +153,9 @@ execution will be stopped by default.
 
 ##### 2.1. Functions
 ```javascript
-function sum(a, b) {
+window.ns.sum = function sum(a, b) {
   if ( typeof(a) + typeof(b) !== 'numbernumber') {
-    throw Error('invalid arguments');
+    throw new Error('invalid arguments');
   }
   this.result = a + b; 
   return this.result;
@@ -176,17 +168,11 @@ console.log(
   J(sum)(1,2),
   new J(sum)(1,2)
 );
-/* console: 
-   3 {"result":3} 
-*/
 ```
 
 This call will raise an exception
 ```javascript
 J(sum)('oops!'); 
-/* console: 
-   sum.constructor : invalid arguments 
-*/
 ```
 
 
@@ -197,14 +183,7 @@ var anonymous = function(msg) {
   console.log(msg);
 }
 
-J(anonymous)();
-// anonymous4.constructor : _undefined is not defined
-//  - at anonymous (http://localhost:8080/:77:46)
-//  - at wrapper (http://localhost:8080/jacket.js:470:50)
-//  - at http://localhost:8080/:80:21
-/* console: 
-   Anonymous187.constructor : _undefined is not defined 
-*/
+J(anonymous)(); 
 ```
 
 As you can see, error message was modified and anonymous function was presented as "anonymous4". 
@@ -213,7 +192,7 @@ We can name it! Function will lost its anonymity. How? New function will be crea
 
 #### 2.2. Singletons
 
-```javascript
+```
 var named = J('NamedFunction', anonymous);
 
 /* NOW NAMED IS */
@@ -230,10 +209,7 @@ function NamedFunction(msg) {
       e.message = ( _wrapper.origin.name + " constructor : " + e.message); Jacket.handle(e);  
     }
  
-    // oh-ho-how... Can we wrap functions/* console: 
-   Unexpected end of input 
-*/
-``` own methods, created in constructor? That's it. 
+    // oh-ho-how... Can we wrap functions` own methods, created in constructor? That's it. 
     var _self = this; _.each(this, function (val, key) {
       _self[key] = _wrapper.wrap(key, val);
     });
@@ -253,7 +229,7 @@ Instance methods, which were created in constructor supposed to be wrapped after
 If there are callings of these methods inside the constructor and one of them contains mistakes, 
 exception should be catched inside constructor.
 
-```javascript
+```
 var _Class = (function _Class() {
   function _Class(wishes) {
     this.defInConst = function() {
@@ -276,11 +252,6 @@ new J(_Class)('call defInConst inside constructor')
 // _Class constructor : _undefined is not defined
 //  - at http://localhost:8080/jacket.js:281:48
 //  - at http://localhost:8080/:96:22 
-/* console: 
-   undefined 
-   _Class.defInConst : _undefined is not defined 
-   _Class.constructor : _undefined is not defined 
-*/
 ```
 
 
@@ -300,7 +271,7 @@ What functionality does it provide in case of error handling?
 ##### 3.2. Configuring
 
 ##### 3.3. Writing own handler
-```javascript
+```
 /* create additional handler */
 Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
   /* your code */
@@ -330,14 +301,11 @@ method arguments and its result as arguments
 ##### 4.2. Method's protection
 
 
-```javascript
+```
 J(function my(a){return a+1;}, function(scope, name, method, args, result) {
   /* it's usefull to implement Backbone.Events for example */
   console.log(arguments);
 })(1);
 /* WILL OUTPUT TO CONSOLE */
 ['[Object object]', 'my', 'constructor', [1], 2]
-/* console: 
-   {"0":"my","1":"constructor","2":Object} 
-*/
 ```

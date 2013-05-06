@@ -9,7 +9,8 @@ window.application = {
   db:localStorage,
   converter:"marked", // default converter is `marked`
   isRendering:false,
-  converter: "githubAPI"
+  converter: "githubAPI",
+  loadTimer: null
 };
 window.URL = window.URL || window.webkitURL;
 
@@ -162,7 +163,7 @@ function handleOnClick(id){
       viewRaw("md");
     break;
     case "btnSave":
-      saveFile();
+      save();
       break;
     case "btnRawHtml":
       // show Raw .html file
@@ -182,9 +183,11 @@ function handleOnClick(id){
   }
 }
 
-function saveFile() {
+function save() {
   $.post('/save', {raw: application.editor.getValue(), md: application.md});
 }
+
+var scriptTmpDir = 'examples/';
 
 // read local file
 function readFile(f){
@@ -241,9 +244,15 @@ function autoReload(){
 
 autoReload();
 
+window.example_id = 'main';
+window.logs = {};
 window.log = function() {
 
   if (arguments.length) {
+
+    if (typeof window.logs[window.example_id] === 'undefined') {
+      window.logs[window.example_id] = ''
+    }
     
     var text = '\n';
 
@@ -262,9 +271,11 @@ window.log = function() {
     }
 
     text = text.replace(/(\n)/g, '\n   ').replace(/-[\s]*[-]+/g, '');
+    console.log(' >>>> ', window.example_id);
     console.log.apply(console, arguments);
   
-    window.logs += text;
+    window.logs[window.example_id] += text;
+
   }
 };
 
@@ -272,11 +283,16 @@ if (typeof Jacket !== 'undefined') {
   Jacket.log = window.log;
   Jacket.err = window.log;
   Jacket.config.throw_errors = false;
-  Jacket.config.log_stacktrace = false;
+  Jacket.config.log_callstack = false;
 }
+
 
 // convert markdown to html
 function convert(force){
+
+  if (application.loadTimer !== null) {
+    return;
+  }
 
   $("#alertMessage").alert("close");
 
@@ -294,15 +310,56 @@ function convert(force){
 
   application.db.setItem("#in",application.md);
 
+  application.rewrites = {};
+  application.loaded = 0;
+
+  //code + ( window.logs.length ? '/* console: ' + window.logs + '\n*\/\n' : '' )
   application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code, post) {
-    window.logs = '';
-    try {
-      window.eval.call(window, code.replace(/console.log/, 'window.log') );  
-    } catch (e) {
-      log(e.message);
-    }
-    return pre + code + ( window.logs.length ? '/* console: ' + window.logs + '\n*\/\n' : '' ) + '```';
+    var id = _.uniqueId('example');
+    application.rewrites[id] = code;
+    console.log(' > ', id, Object.keys(application.rewrites).length);
+    var src = code.replace(/console.log/g, 'log');
+    src += '\nwindow.application.md.replace(/\\|' + id + '\\|/, window.application.rewrites["' + id + '"]);';
+    $.post('/example', {filename: scriptTmpDir + id + '.js', src: src}, function() {
+      application.loaded++;
+    });
+    return '```javascript\n|' + id + '|\n```';
   });
+
+  application.loadTimer = setInterval(function(){
+
+    if (application.loaded === Object.keys(application.rewrites).length) {
+      rewrite(force);
+      clearInterval(application.loadTimer);
+      application.loadTimer = null;
+    }
+
+  }, 100);
+
+}
+
+function rewrite(force) {
+  var i = 0;
+  _.each(application.rewrites, function(code, id) {
+    i++;
+    setTimeout(function(){
+      var oHead = document.getElementsByTagName('HEAD').item(0);
+      var oScript= document.createElement("script");
+      oScript.type = "text/javascript";
+      oScript.src = '/' + scriptTmpDir + id + '.js';
+      window.example_id = id;
+      oHead.appendChild( oScript);
+    }, i*50);
+  });
+  i+=2;
+  setTimeout(function(){
+    render(force);
+  }, i*50);
+}
+
+function render(force) {
+
+  console.log('RENDER', application.md);
 
   // hide html
   $("#out").fadeOut("fast").empty();
