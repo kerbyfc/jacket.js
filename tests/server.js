@@ -5,6 +5,7 @@ var server = connect (
   
   connect.bodyParser(),
   connect['static'](__dirname),
+  connect['static']('../'),
 
   connectRoute( function(app) {
     app.post('/error', function(req, res){
