@@ -246,13 +246,10 @@ autoReload();
 
 window.example_id = 'main';
 window.logs = {};
+
 window.log = function() {
 
   if (arguments.length) {
-
-    if (typeof window.logs[window.example_id] === 'undefined') {
-      window.logs[window.example_id] = ''
-    }
     
     var text = '\n';
 
@@ -270,10 +267,9 @@ window.log = function() {
       text += res + ' ';
     }
 
-    text = text.replace(/(\n)/g, '\n   ').replace(/-[\s]*[-]+/g, '');
-    console.log(' >>>> ', window.example_id);
-    console.log.apply(console, arguments);
-  
+    text = text.replace(/-[\s]*[-]+/g, '').replace(/\n/g, '\n  ');
+
+    console.log.apply(console, arguments);  
     window.logs[window.example_id] += text;
 
   }
@@ -317,9 +313,10 @@ function convert(force){
   application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code, post) {
     var id = _.uniqueId('example');
     application.rewrites[id] = code;
+    window.logs[id] = '';
     console.log(' > ', id, Object.keys(application.rewrites).length);
-    var src = code.replace(/console.log/g, 'log');
-    src += '\nwindow.application.md.replace(/\\|' + id + '\\|/, window.application.rewrites["' + id + '"]);';
+    var src = 'console.log(this);window.example_id = "' + id + '";try {' + code.replace(/console.log/g, 'log') + '} catch (e) {console.error(e.message);}';
+    src += '\nwindow.application.md = window.application.md.replace("|' + id + '|", "\\n" + window.application.rewrites["' + id + '"] + ( window.logs["' + id + '"].length ? "\\n/\\* console: \\n" + window.logs["' + id + '"] + "\\n\\n\\*\/\\n" : "" ));';
     $.post('/example', {filename: scriptTmpDir + id + '.js', src: src}, function() {
       application.loaded++;
     });
@@ -347,8 +344,7 @@ function rewrite(force) {
       var oScript= document.createElement("script");
       oScript.type = "text/javascript";
       oScript.src = '/' + scriptTmpDir + id + '.js';
-      window.example_id = id;
-      oHead.appendChild( oScript);
+      oHead.appendChild( oScript );
     }, i*50);
   });
   i+=2;
@@ -358,8 +354,6 @@ function rewrite(force) {
 }
 
 function render(force) {
-
-  console.log('RENDER', application.md);
 
   // hide html
   $("#out").fadeOut("fast").empty();

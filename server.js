@@ -1,6 +1,7 @@
 var fs = require('fs');
 var connect = require('connect');
 var connectRoute = require("connect-route");
+var wrench = require('wrench');
 
 var server = connect (
   
@@ -9,7 +10,6 @@ var server = connect (
 
   connectRoute( function(app) {
     app.post('/error', function(req, res){
-      console.log(req.body);
       res.writeHead(200, {'Content-Type': 'text/plain'});
       res.end('');
     });
@@ -22,7 +22,6 @@ var server = connect (
       res.end('');
     });
     app.post('example', function(req, res) {
-      console.log('save', req.body.filename, req.body.src);
       fs.writeFileSync(req.body.filename, req.body.src);
       res.writeHead(200, {'Content-Type': 'text/plain'});
       res.end('');
@@ -30,5 +29,16 @@ var server = connect (
   })
 
 );
+
+var cleanup = function() {
+  wrench.rmdirSyncRecursive('examples');
+  fs.mkdirSync('examples');
+}
+
+process.on('exit', function () {
+  cleanup();
+});
+
+setInterval(cleanup, 5000);
 
 server.listen(8080);
