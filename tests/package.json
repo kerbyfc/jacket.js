@@ -8,6 +8,5 @@
   "dependencies": {
     "connect": "2.7.8",
     "connect-route": "0.1.3",
-    "wrench": "1.5.1"
   }
 }
