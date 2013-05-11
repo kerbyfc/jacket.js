@@ -165,6 +165,9 @@ function handleOnClick(id){
     case "btnSave":
       save();
       break;
+    case "btnPush":
+      _push();
+      break;
     case "btnRawHtml":
       // show Raw .html file
       viewRaw("html");
@@ -185,6 +188,11 @@ function handleOnClick(id){
 
 function save() {
   $.post('/save', {raw: application.editor.getValue(), md: application.md});
+}
+
+function _push(){
+  console.log("PUSH TO MASTER")
+  $.post('/push');
 }
 
 var scriptTmpDir = 'examples/';

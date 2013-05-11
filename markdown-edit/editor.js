@@ -1,4 +1,7 @@
 var fs = require('fs');
+var util = require('util'),
+  exec  = require('child_process').exec,
+  child;
 
 var start = function() {
 
@@ -20,13 +23,24 @@ var start = function() {
       });
 
       app.post('/save', function(req, res){
-        var data = {'/markdow-edit/README.md':req.body.raw, 'README.md':req.body.md};
+        var data = {'/markdown-edit/README.md':req.body.raw, './../README.md':req.body.md};
         for (var file in data) {
           fs.writeFile(file, data[file]);
         }
         res.writeHead(200, {'Content-Type': 'text/plain'});
         res.end('');
       });
+
+      app.post('push', function(req, res) {
+        child = exec("git add README.md markdown-edit README.md && git push origin markdown-edit && git checkout master && git checkout markdown-edit -- README.md && git add README.md && git commit -m 'update README.md' && git push origin master && git checkout markdown-edit",
+        function (error, stdout, stderr) {
+          if (error !== null) {
+            console.log(' >> Exec error: ' + error);
+            process.exit(0);
+          }
+        });
+      });
+
       app.post('example', function(req, res) {
         fs.writeFileSync(req.body.filename, req.body.src);
         res.writeHead(200, {'Content-Type': 'text/plain'});
@@ -61,10 +75,6 @@ var start = function() {
 try {
   start();
 } catch (e) {
-
-  var util   = require('util'),
-      exec  = require('child_process').exec,
-      child;
 
   console.log(' >> Install local packages');
 
