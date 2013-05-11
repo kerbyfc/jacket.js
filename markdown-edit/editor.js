@@ -32,7 +32,7 @@ var start = function() {
       });
 
       app.post('push', function(req, res) {
-        child = exec("git add . && git commit -m 'update README.md' && git push -u origin/markdown-edit && git checkout master && git checkout markdown-edit -- README.md && git add README.md && git commit -m 'update README.md' && git push origin master && git checkout markdown-edit",
+        child = exec("git add . && git commit -m 'update README.md' && git push -u origin markdown-edit && git checkout master && git checkout markdown-edit -- README.md && git add README.md && git commit -m 'update README.md' && git push origin master && git checkout markdown-edit",
         function (error, stdout, stderr) {
           if (error !== null) {
             console.log(' >> Exec error: ' + error);
