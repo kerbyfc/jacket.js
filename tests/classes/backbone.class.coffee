@@ -1,4 +1,4 @@
-this.BackboneView = J 'OLOL', Backbone.View.extend
+window.BackboneView = J Backbone.View, 
 
   constructor: -> 
     fsdf
