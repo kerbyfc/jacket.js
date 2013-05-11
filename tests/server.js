@@ -1,11 +1,12 @@
 var connect = require('connect');
 var connectRoute = require("connect-route");
+var fs = require('fs');
+var open = require('open');
 
 var server = connect (
   
   connect.bodyParser(),
   connect['static'](__dirname),
-  connect['static']('../'),
 
   connectRoute( function(app) {
     app.post('/error', function(req, res){
@@ -16,4 +17,12 @@ var server = connect (
 
 );
 
-server.listen(8080);
+if (process.cwd().match(/tests[\/]*$/) === null) {
+  process.chdir('tests');
+}
+  
+fs.createReadStream('../jacket.js').pipe(fs.createWriteStream('jacket.js'));
+
+server.listen(8008);
+
+module.exports = open;
