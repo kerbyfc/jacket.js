@@ -246,7 +246,7 @@ function autoReload(){
     setTimeout(function(){
       if (application.cachedMD != application.editor.getValue()) convert();
       autoReload();
-    },10000);
+    },60000);
   }
 }
 
@@ -317,14 +317,13 @@ function convert(force){
   application.rewrites = {};
   application.loaded = 0;
 
-  //code + ( window.logs.length ? '/* console: ' + window.logs + '\n*\/\n' : '' )
-  application.md = application.md.replace(/(```javascript)([^`]+)(`)+/g, function(str, pre, code, post) {
+  application.md = application.md.replace(/(```javascript\n)([^`]+)(`)+/g, function(str, pre, code, post) {
     var id = _.uniqueId('example');
     application.rewrites[id] = code;
     window.logs[id] = '';
     console.log(' > ', id, Object.keys(application.rewrites).length);
     var src = 'console.log(this);window.example_id = "' + id + '";try {' + code.replace(/console.log/g, 'log') + '} catch (e) {console.error(e.message);}';
-    src += '\nwindow.application.md = window.application.md.replace("|' + id + '|", "\\n" + window.application.rewrites["' + id + '"] + ( window.logs["' + id + '"].length ? "\\n/\\* console: \\n" + window.logs["' + id + '"] + "\\n\\n\\*\/\\n" : "" ));';
+    src += '\nwindow.application.md = window.application.md.replace("|' + id + '|", window.application.rewrites["' + id + '"] + ( window.logs["' + id + '"].length ? "\\n/\\* console: \\n" + window.logs["' + id + '"] + "\\n\\n\\*\/\\n" : "" ));';
     $.post('/example', {filename: scriptTmpDir + id + '.js', src: src}, function() {
       application.loaded++;
     });
@@ -399,8 +398,6 @@ function render(force) {
     }
 
   }
-
-  console.log(application.md)
 
   switch (application.converter) {
     case "githubAPI":

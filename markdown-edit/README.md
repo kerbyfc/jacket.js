@@ -5,8 +5,8 @@ Jacket.js
 
 1. [Conception](#1-conception)
  <br/>1.1 [Pros & cons](#11-pros--cons)
-2. [Jacket function](#2-jacket-function)
- <br/>2.1. [Arguments](#21-arguments)
+2. [Jacket](#2-jacket)
+ <br/>2.1. [Constructor](#21-constructor)
  <br/>2.2. [Options](#22-options)
 3. [Usage examples](#3-usage-examples)
  <br/>3.1. [Functions](#31-functions)
@@ -61,11 +61,134 @@ Actual questions, aren't they?
   </tr></tbody>
 </table>
 
-#### 2. Jacket function
+#### 2. Jacket
 
-##### 2.1. Arguments
+##### 2.1. Constructor
+
+In most situations you'll use Jacket.constructor function without new keyword. Using it with new keyword will instantiate wrapped function.
+
+First case - wrap function, then instantiate it.
+```javascript
+var fn = function(){};
+fn = Jacket( fn );
+new fn();
+```
+
+Second case - wrap and instantiate it instantly.
+```javascript
+new Jacket( function(a){console.log(a)} )( 'hi!' );
+```
+
+```CoffeeScript
+Jacket( name, target, extention, methods, callback )
+```
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th>Argument</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top">name</td>
+      <td valign="top">String</td>
+      <td valign="top">false</td>
+      <td valign="top">name of the new class, that should be created</td>
+    </tr>
+    <tr>
+      <td valign="top">target</td>
+      <td valign="top">Object<br/>Function</td>
+      <td valign="top">true</td>
+      <td valign="top">object, what should be wrapped</td>
+    </tr>
+    <tr>
+      <td valign="top">extention</td>
+      <td valign="top">Object</td>
+      <td valign="top">false</td>
+      <td valign="top">object, witch properties will extend target </td>
+    </tr>
+    <tr>
+      <td valign="top">methods</td>
+      <td valign="top">Array<br/>RegExp</td>
+      <td valign="top">false</td>
+      <td valign="top">array of method names, witch would be wrapped, or RegExp pattern</td>
+    </tr>
+    <tr>
+      <td valign="top">callback</td>
+      <td valign="top">Function</td>
+      <td valign="top">false</td>
+      <td valign="top">post-hook, that should be applyed after method call, before returning of its results</td>
+    </tr>
+  </tbody>
+</table>
 
 ##### 2.2. Options
+All Jacket options are storing in the Jacket.config object. 
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top">log_errors</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">true</td>
+      <td valign="top">name of the new class, that should be created</td>
+    </tr>
+    <tr>
+      <td valign="top">log_stacktrace</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">true</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">log_callstack</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">false</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">use_debugger</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">false</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">throw_errors</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">true</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">notify_url</td>
+      <td valign="top">String<br/>Boolean</td>
+      <td valign="top">false</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">events_count</td>
+      <td valign="top">Integer</td>
+      <td valign="top">100</td>
+      <td valign="top"></td>
+    </tr>    
+  </tbody>
+</table>
+
+<br/>Jacket has <i>setup</i> method, that helps to set option values.
+```javascript
+console.log( Jacket.config );
+```
+
 
 #### 3. Usage examples
 
@@ -76,11 +199,9 @@ var j = function () {
 }
 ```
 using [CoffeeScript](http://coffeescript.org):
-```coffeescript
-
-
-j = J -> _undefined
-
+```CoffeeScript
+j = J -> 
+  _undefined
 ```
 
 To get stack trace you might handle error by this way: 

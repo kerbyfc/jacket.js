@@ -5,8 +5,8 @@ Jacket.js
 
 1. [Conception](#1-conception)
  <br/>1.1 [Pros & cons](#11-pros--cons)
-2. [Jacket function](#2-jacket-function)
- <br/>2.1. [Arguments](#21-arguments)
+2. [Jacket](#2-jacket)
+ <br/>2.1. [Constructor](#21-constructor)
  <br/>2.2. [Options](#22-options)
 3. [Usage examples](#3-usage-examples)
  <br/>3.1. [Functions](#31-functions)
@@ -61,36 +61,168 @@ Actual questions, aren't they?
   </tr></tbody>
 </table>
 
-#### 2. Jacket function
+#### 2. Jacket
 
-##### 2.1. Arguments
+##### 2.1. Constructor
+
+In most situations you'll use Jacket.constructor function without new keyword. Using it with new keyword will instantiate wrapped function.
+
+First case - wrap function, then instantiate it.
+```javascript
+var fn = function(){};
+fn = Jacket( fn );
+new fn();
+
+```
+
+Second case - wrap and instantiate it instantly.
+```javascript
+new Jacket( function(a){console.log(a)} )( 'hi!' );
+
+/* console: 
+
+  hi! 
+
+*/
+
+```
+
+```CoffeeScript
+Jacket( name, target, extention, methods, callback )
+```
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th>Argument</th>
+      <th>Type</th>
+      <th>Required</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top">name</td>
+      <td valign="top">String</td>
+      <td valign="top">false</td>
+      <td valign="top">name of the new class, that should be created</td>
+    </tr>
+    <tr>
+      <td valign="top">target</td>
+      <td valign="top">Object<br/>Function</td>
+      <td valign="top">true</td>
+      <td valign="top">object, what should be wrapped</td>
+    </tr>
+    <tr>
+      <td valign="top">extention</td>
+      <td valign="top">Object</td>
+      <td valign="top">false</td>
+      <td valign="top">object, witch properties will extend target </td>
+    </tr>
+    <tr>
+      <td valign="top">methods</td>
+      <td valign="top">Array<br/>RegExp</td>
+      <td valign="top">false</td>
+      <td valign="top">array of method names, witch would be wrapped, or RegExp pattern</td>
+    </tr>
+    <tr>
+      <td valign="top">callback</td>
+      <td valign="top">Function</td>
+      <td valign="top">false</td>
+      <td valign="top">post-hook, that should be applyed after method call, before returning of its results</td>
+    </tr>
+  </tbody>
+</table>
 
 ##### 2.2. Options
+All Jacket options are storing in the Jacket.config object. 
+
+<table width="100%">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top">log_errors</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">true</td>
+      <td valign="top">name of the new class, that should be created</td>
+    </tr>
+    <tr>
+      <td valign="top">log_stacktrace</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">true</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">log_callstack</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">false</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">use_debugger</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">false</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">throw_errors</td>
+      <td valign="top">Boolean</td>
+      <td valign="top">true</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">notify_url</td>
+      <td valign="top">String<br/>Boolean</td>
+      <td valign="top">false</td>
+      <td valign="top"></td>
+    </tr>
+    <tr>
+      <td valign="top">events_count</td>
+      <td valign="top">Integer</td>
+      <td valign="top">100</td>
+      <td valign="top"></td>
+    </tr>    
+  </tbody>
+</table>
+
+<br/>Jacket has <i>setup</i> method, that helps to set option values.
+```javascript
+console.log( Jacket.config );
+
+/* console: 
+
+  {"log_errors":true,"log_stacktrace":true,"log_callstack":false,"use_debugger":false,"throw_errors":false,"notify_url":false,"events_count":100} 
+
+*/
+
+```
+
 
 #### 3. Usage examples
 
 Suppose you have a function, that throws an exception:
 ```javascript
-
-
 var j = function () {
   return _undefined;
 }
 
 ```
 using [CoffeeScript](http://coffeescript.org):
-```coffeescript
-
-
-j = J -> _undefined
-
+```CoffeeScript
+j = J -> 
+  _undefined
 ```
 
 To get stack trace you might handle error by this way: 
 
 ```javascript
-
-
 var handler = function(err) { /* handle, notify your server about this error */ }
 var fn = function () {
   try {
@@ -108,8 +240,6 @@ raised by you client side application, you must have an easy way of code' wrappi
 #### Jacket.js makes it real!
 
 ```javascript
-
-
 var j = Jacket(function () { /* use J instead of Jacket for convenience */
   return _undefined;
 });
@@ -119,18 +249,7 @@ var j = Jacket(function () { /* use J instead of Jacket for convenience */
 
 Run
 ```javascript
-
-
-j();
-
-/* console: 
-
-  Anonymous11.constructor : _undefined is not defined 
-   - at http://localhost:8008/examples/example3.js:3:10
-   - at http://localhost:8008/examples/example4.js:2:1 
-
-*/
-
+|example688|
 ```
  
 #### Which type of objects can we wrap?
@@ -141,28 +260,7 @@ execution will be stopped by default.
 ##### 3.1. Functions
 Let's begin with anonymous functions
 ```javascript
-
-
-var anonymous = function(msg) {
-  if (!arguments.length) arguments = _undefined;
-  console.log(msg);
-}
-var j = J(anonymous);
-console.log(
-  j.wrapped, 
-  j !== anonymous,
-  j()
-);
-
-/* console: 
-
-  Anonymous12.constructor : _undefined is not defined 
-   - at anonymous (http://localhost:8008/examples/example5.js:3:38)
-   - at http://localhost:8008/examples/example5.js:10:3 
-  true true undefined 
-
-*/
-
+|example689|
 ```
 
 Named functions are considered as classes 
@@ -170,38 +268,7 @@ and have protected name property,
 that Jacket uses to extend
 exception message explanation.
 ```javascript
-
-
-function sum(a, b) {
-  if (typeof a + typeof b !== 'numbernumber') {
-    throw new Error('Invalid arguments');  
-  }
-  this.result = a + b;
-  return this.result;
-}
-
-console.log(
-  ' - sum constructor: ', J(sum)(1, 1),            
-  '\n - sum instance:',  new J(sum)(1, 1)
-)
-
-J(sum)('oops!'); // will throw an error         
-                                        
-console.log('continue...');    // will not be executed 
-                               // if J.config.throw_errors is positive
-
-
-/* console: 
-
-   - sum constructor:  2 
-   - sum instance: {"result":2} 
-  sum.constructor : Invalid arguments 
-   - at sum (http://localhost:8008/examples/example6.js:4:11)
-   - at http://localhost:8008/examples/example6.js:15:7 
-  continue... 
-
-*/
-
+|example690|
 ```
 
 
@@ -213,42 +280,7 @@ We can name it! Function will lost its anonymity. How? New function will be crea
 Imagine that one of your class must be instantiated once, and you want to know if it happens.
 Then you can pass Error object to Jacket, and it will do the rest of work.
 ```javascript
-
-
-var SingletonConstructor;
-
-(function() {
-  
-  var instance;
-  var crash = new Error('SingletonConstructor was called more than one time');
-  
-  SingletonConstructor = function() {
-    
-    if (typeof instance !== 'undefined') {
-      J.handle(crash); // throw an error if instance has been already created
-      ++instance.callcount;
-      return instance;
-    }
-    
-    this.callcount = 1;
-    return instance = this;
-  
-  };
-  
-})();
-
-new J(SingletonConstructor)(); // will create an instance
-console.log( new J(SingletonConstructor)() );
-
-/* console: 
-
-  SingletonConstructor was called more than one time 
-   - at http://localhost:8008/examples/example7.js:7:15
-   - at http://localhost:8008/examples/example7.js:22:3 
-  {"callcount":2} 
-
-*/
-
+|example691|
 ```
 
 ##### 3.3. CoffeeScript classes
@@ -260,40 +292,7 @@ If there are callings of these methods inside the constructor and one of them co
 exception should be catched inside constructor.
 
 ```javascript
-
-
-var _Class = (function _Class() {
-  function _Class(wishes) {
-    this.defInConst = function() {
-      return _undefined; 
-    }
-    if (wishes)
-      this.defInConst(); 
-  }
-  return _Class;
-}).call(window);
-
-new J(_Class)().defInConst();
-
-console.log('\n - compare theese outputs - \n');
-
-new J(_Class)('call defInConst inside constructor');
-
-/* console: 
-
-  _Class.defInConst : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example8.js:5:14)
-   - at http://localhost:8008/examples/example8.js:13:17 
-  
-   - compare theese outputs - 
-   
-  _Class.constructor : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example8.js:5:14)
-   - at _Class (http://localhost:8008/examples/example8.js:8:12)
-   - at http://localhost:8008/examples/example8.js:17:14 
-
-*/
-
+|example692|
 ```
 
 
@@ -314,13 +313,7 @@ What functionality does it provide in case of error handling?
 
 ##### 4.3. Writing own handler
 ```javascript
-
-
-/* create additional handler */
-Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
-  /* your code */
-}
-
+|example693|
 ```
 
 
@@ -347,19 +340,5 @@ method arguments and its result as arguments
 
 
 ```javascript
-
-
-J(function my(a){return a+1;}, function(scope, name, method, args, result) {
-  /* it's usefull to implement Backbone.Events for example */
-  console.log(arguments);
-})(1);
-/* WILL OUTPUT TO CONSOLE */
-['[Object object]', 'my', 'constructor', [1], 2]
-
-/* console: 
-
-  {"0":"my","1":"constructor","2":Object} 
-
-*/
-
+|example694|
 ```
