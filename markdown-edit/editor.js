@@ -32,13 +32,15 @@ var start = function() {
       });
 
       app.post('push', function(req, res) {
-        child = exec("git add . && git commit -m 'update README.md' && git push && git checkout master && git checkout markdown-edit -- README.md && git add README.md && git commit -m 'update README.md' && git push origin master && git checkout markdown-edit",
-        function (error, stdout, stderr) {
-          if (error !== null) {
-            console.log(' >> Exec error: ' + error);
-            process.exit(0);
-          }
-        });
+        //&& git checkout master && git checkout markdown-edit -- README.md && git add README.md && git commit -m 'update README.md' && git push origin master && git checkout markdown-edit",
+        // exec("git add . && git commit -m 'update README.md' && git push ", 
+        // function (error, stdout, stderr) {
+        //   if (error !== null) {
+        //     exec("git checkout -- master")
+        //   }
+        // });
+        res.writeHead(200, {'Content-Type': 'text/plain'});
+        res.end('');
       });
 
       app.post('example', function(req, res) {
