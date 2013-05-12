@@ -82,9 +82,9 @@ j();
 
 /* console: 
 
-  Anonymous1027.constructor : _undefined is not defined 
-   - at http://localhost:8008/examples/example1016.js:2:10
-   - at http://localhost:8008/examples/example1017.js:1:58 
+  Anonymous266.constructor : _undefined is not defined 
+   - at http://localhost:8008/examples/example255.js:2:10
+   - at http://localhost:8008/examples/example256.js:1:57 
 
 */
 
@@ -282,9 +282,9 @@ console.log(
 
 /* console: 
 
-  Anonymous1030.constructor : _undefined is not defined 
-   - at anonymous (http://localhost:8008/examples/example1021.js:2:38)
-   - at http://localhost:8008/examples/example1021.js:9:3 
+  Anonymous269.constructor : _undefined is not defined 
+   - at anonymous (http://localhost:8008/examples/example260.js:2:38)
+   - at http://localhost:8008/examples/example260.js:9:3 
   true true undefined 
 
 */
@@ -295,6 +295,7 @@ Named functions are considered as classes
 and have protected name property, 
 that Jacket uses to extend
 exception message explanation.
+
 ```javascript
 function sum(a, b) {
   if (typeof a + typeof b !== 'numbernumber') {
@@ -320,22 +321,19 @@ console.log('continue...');    // will not be executed
    - sum constructor:  2 
    - sum instance: {"result":2} 
   sum.constructor : Invalid arguments 
-   - at sum (http://localhost:8008/examples/example1022.js:3:11)
-   - at http://localhost:8008/examples/example1022.js:14:7 
+   - at sum (http://localhost:8008/examples/example261.js:3:11)
+   - at http://localhost:8008/examples/example261.js:14:7 
   continue... 
 
 */
 
 ```
 
-
-As you can see, error message was modified and anonymous function was presented as "anonymous4". 
-We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
-
-
 #### 3.2. Singletons
+
 Imagine that one of your class must be instantiated once, and you want to know if it happens.
 Then you can pass Error object to Jacket, and it will do the rest of work.
+
 ```javascript
 var SingletonConstructor;
 
@@ -360,14 +358,14 @@ var SingletonConstructor;
 })();
 
 new J(SingletonConstructor)(); // will create an instance
-console.log( new J(SingletonConstructor)() );
+console.log( 'instance:', new J(SingletonConstructor)() );
 
 /* console: 
 
   SingletonConstructor was called more than one time 
-   - at http://localhost:8008/examples/example1023.js:6:15
-   - at http://localhost:8008/examples/example1023.js:21:3 
-  {"callcount":2} 
+   - at http://localhost:8008/examples/example262.js:6:15
+   - at http://localhost:8008/examples/example262.js:21:3 
+  instance: {"callcount":2} 
 
 */
 
@@ -402,15 +400,15 @@ new J(_Class)('call defInConst inside constructor');
 /* console: 
 
   _Class.defInConst : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example1024.js:4:14)
-   - at http://localhost:8008/examples/example1024.js:12:17 
+   - at _Class.defInConst (http://localhost:8008/examples/example263.js:4:14)
+   - at http://localhost:8008/examples/example263.js:12:17 
   
    - compare theese outputs - 
    
   _Class.constructor : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example1024.js:4:14)
-   - at _Class (http://localhost:8008/examples/example1024.js:7:12)
-   - at http://localhost:8008/examples/example1024.js:16:14 
+   - at _Class.defInConst (http://localhost:8008/examples/example263.js:4:14)
+   - at _Class (http://localhost:8008/examples/example263.js:7:12)
+   - at http://localhost:8008/examples/example263.js:16:14 
 
 */
 
@@ -465,17 +463,5 @@ method arguments and its result as arguments
 
 
 ```javascript
-J(function my(a){return a+1;}, function(scope, name, method, args, result) {
-  /* it's usefull to implement Backbone.Events for example */
-  console.log(arguments);
-})(1);
-/* WILL OUTPUT TO CONSOLE */
-['[Object object]', 'my', 'constructor', [1], 2]
-
-/* console: 
-
-  {"0":"my","1":"constructor","2":Object} 
-
-*/
-
+|example265|
 ```

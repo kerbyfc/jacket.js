@@ -258,6 +258,7 @@ Named functions are considered as classes
 and have protected name property, 
 that Jacket uses to extend
 exception message explanation.
+
 ```javascript
 function sum(a, b) {
   if (typeof a + typeof b !== 'numbernumber') {
@@ -279,14 +280,11 @@ console.log('continue...');    // will not be executed
 
 ```
 
-
-As you can see, error message was modified and anonymous function was presented as "anonymous4". 
-We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
-
-
 #### 3.2. Singletons
+
 Imagine that one of your class must be instantiated once, and you want to know if it happens.
 Then you can pass Error object to Jacket, and it will do the rest of work.
+
 ```javascript
 var SingletonConstructor;
 
@@ -311,7 +309,7 @@ var SingletonConstructor;
 })();
 
 new J(SingletonConstructor)(); // will create an instance
-console.log( new J(SingletonConstructor)() );
+console.log( 'instance:', new J(SingletonConstructor)() );
 ```
 
 ##### 3.3. CoffeeScript classes
