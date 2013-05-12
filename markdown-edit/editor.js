@@ -23,7 +23,7 @@ var start = function() {
       });
 
       app.post('/save', function(req, res){
-        var data = {'/markdown-edit/README.md':req.body.raw, './../README.md':req.body.md};
+        var data = {'./README.md':req.body.raw, './../README.md':req.body.md};
         for (var file in data) {
           fs.writeFile(file, data[file]);
         }

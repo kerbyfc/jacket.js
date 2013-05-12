@@ -5,18 +5,21 @@ Jacket.js
 
 1. [Conception](#1-conception)
  <br/>1.1 [Pros & cons](#11-pros--cons)
-2. [Basic Usage](#2-basic-usage)
- <br/>2.1. [Functions](#21-functions)
- <br/>2.2. [Singletons](#22-singletons)
- <br/>2.3. [Coffescript classes](#23-coffeescript-classes)
- <br/>2.4. [Backbone extensions](#24-backbone-extensions)
-3. [Error handling](#3-error-handling)
- <br/>3.1. [Out of the box](#31-out-of-the-box)
- <br/>3.2. [Configuring](#32-configuring)
- <br/>3.3. [Writing own handler](#33-writing-own-handler)
-4. [Additional features](#4-additional-features)
- <br/>4.1. [Callbacks](#41-callbacks)
- <br/>4.2. [Methods' protection](#42-methods-protection)
+2. [Jacket function](#2-jacket-function)
+ <br/>2.1. [Arguments](#21-arguments)
+ <br/>2.2. [Options](#22-options)
+3. [Usage examples](#3-usage-examples)
+ <br/>3.1. [Functions](#31-functions)
+ <br/>3.2. [Singletons](#32-singletons)
+ <br/>3.3. [Coffescript classes](#33-coffeescript-classes)
+ <br/>3.4. [Backbone extensions](#34-backbone-extensions)
+4. [Error handling](#4-error-handling)
+ <br/>4.1. [Out of the box](#41-out-of-the-box)
+ <br/>4.2. [Configuring](#42-configuring)
+ <br/>4.3. [Writing own handler](#43-writing-own-handler)
+5. [Additional features](#5-additional-features)
+ <br/>5.1. [Callbacks](#51-callbacks)
+ <br/>5.2. [Methods' protection](#52-methods-protection)
 
 #### 1. Conception
 
@@ -58,7 +61,13 @@ Actual questions, aren't they?
   </tr></tbody>
 </table>
 
-#### 2. Basic Usage
+#### 2. Jacket function
+
+##### 2.1. Arguments
+
+##### 2.2. Options
+
+#### 3. Usage examples
 
 Suppose you have a function, that throws an exception:
 ```javascript
@@ -116,9 +125,9 @@ j();
 
 /* console: 
 
-  Anonymous3553.constructor : _undefined is not defined 
-   - at http://localhost:8008/examples/example3545.js:3:10
-   - at http://localhost:8008/examples/example3546.js:2:1 
+  Anonymous11.constructor : _undefined is not defined 
+   - at http://localhost:8008/examples/example3.js:3:10
+   - at http://localhost:8008/examples/example4.js:2:1 
 
 */
 
@@ -129,7 +138,7 @@ Jacket.js is able to wrap classes, functions and objects.
 After exception handling, it will be thrown on and the script 
 execution will be stopped by default. 
 
-##### 2.1. Functions
+##### 3.1. Functions
 Let's begin with anonymous functions
 ```javascript
 
@@ -147,9 +156,9 @@ console.log(
 
 /* console: 
 
-  Anonymous3554.constructor : _undefined is not defined 
-   - at anonymous (http://localhost:8008/examples/example3547.js:3:38)
-   - at http://localhost:8008/examples/example3547.js:10:3 
+  Anonymous12.constructor : _undefined is not defined 
+   - at anonymous (http://localhost:8008/examples/example5.js:3:38)
+   - at http://localhost:8008/examples/example5.js:10:3 
   true true undefined 
 
 */
@@ -187,8 +196,8 @@ console.log('continue...');    // will not be executed
    - sum constructor:  2 
    - sum instance: {"result":2} 
   sum.constructor : Invalid arguments 
-   - at sum (http://localhost:8008/examples/example3548.js:4:11)
-   - at http://localhost:8008/examples/example3548.js:15:7 
+   - at sum (http://localhost:8008/examples/example6.js:4:11)
+   - at http://localhost:8008/examples/example6.js:15:7 
   continue... 
 
 */
@@ -200,7 +209,7 @@ As you can see, error message was modified and anonymous function was presented 
 We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
 
 
-#### 2.2. Singletons
+#### 3.2. Singletons
 Imagine that one of your class must be instantiated once, and you want to know if it happens.
 Then you can pass Error object to Jacket, and it will do the rest of work.
 ```javascript
@@ -234,15 +243,15 @@ console.log( new J(SingletonConstructor)() );
 /* console: 
 
   SingletonConstructor was called more than one time 
-   - at http://localhost:8008/examples/example3549.js:7:15
-   - at http://localhost:8008/examples/example3549.js:22:3 
+   - at http://localhost:8008/examples/example7.js:7:15
+   - at http://localhost:8008/examples/example7.js:22:3 
   {"callcount":2} 
 
 */
 
 ```
 
-##### 2.3. CoffeeScript classes
+##### 3.3. CoffeeScript classes
 Classes represent a more complex structure than functions. 
 They usually have suite of prototype's methods, instance methods and sometimes static methods. 
 All methods of class are supposed to be wrapped. 
@@ -264,39 +273,35 @@ var _Class = (function _Class() {
   return _Class;
 }).call(window);
 
-console.log(_Class.defInConst); // undefined
+new J(_Class)().defInConst();
 
-new J(_Class)().defInConst()
-// _Class.defInConst : _undefined is not defined
-//  - at _Class.wrapper [as defInConst] (http://localhost:8080/jacket.js:478:50)
-//  - at http://localhost:8080/:95:25 
+console.log('\n - compare theese outputs - \n');
 
-new J(_Class)('call defInConst inside constructor')
-// _Class constructor : _undefined is not defined
-//  - at http://localhost:8080/jacket.js:281:48
-//  - at http://localhost:8080/:96:22 
+new J(_Class)('call defInConst inside constructor');
 
 /* console: 
 
-  undefined 
   _Class.defInConst : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example3550.js:5:14)
-   - at http://localhost:8008/examples/example3550.js:15:17 
+   - at _Class.defInConst (http://localhost:8008/examples/example8.js:5:14)
+   - at http://localhost:8008/examples/example8.js:13:17 
+  
+   - compare theese outputs - 
+   
   _Class.constructor : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example3550.js:5:14)
-   - at _Class (http://localhost:8008/examples/example3550.js:8:12)
-   - at http://localhost:8008/examples/example3550.js:20:14 
+   - at _Class.defInConst (http://localhost:8008/examples/example8.js:5:14)
+   - at _Class (http://localhost:8008/examples/example8.js:8:12)
+   - at http://localhost:8008/examples/example8.js:17:14 
 
 */
 
 ```
 
 
-##### 2.4. Backbone extensions
+##### 3.4. Backbone extensions
 
-#### 3. Error handling
+#### 4. Error handling
 
-##### 3.1. Out of the box
+##### 4.1. Out of the box
 What functionality does it provide in case of error handling?
  - It launches browser' debugger if <i>Jacket.config.use_debugger</i> is positive
  - It outputs error message, stacktrace and callstack to console *
@@ -305,9 +310,9 @@ What functionality does it provide in case of error handling?
  - It can prevent script execution stopping
 \* depends on <i>Jacket.config.log_errors</i>, <i>Jacket.config.log_stacktrace</i> and <i>Jacket.config.log_callstack</i> respectively
 
-##### 3.2. Configuring
+##### 4.2. Configuring
 
-##### 3.3. Writing own handler
+##### 4.3. Writing own handler
 ```javascript
 
 
@@ -328,17 +333,17 @@ Jacket.handler = function(error_object, extended_error_msg_string, stacktace_arr
 3. Calling a specific callback on each wrapped function call
 
 
-#### 4. Additional features
+#### 5. Additional features
 
 
-##### 4.1. Callbacks
+##### 5.1. Callbacks
 
 You can specify a global callback function, 
 that should be runned before each return statement of class' methods. 
 This callback gets execution scope, class name, method name, 
 method arguments and its result as arguments
 
-##### 4.2. Method's protection
+##### 5.2. Method's protection
 
 
 ```javascript
