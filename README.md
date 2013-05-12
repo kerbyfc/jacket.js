@@ -1,33 +1,3 @@
-```javascript
-
-
-window.bad = function(){ return _undefined; };
-
-```
-
-```javascript
-
- 
-bad();
-
-```
-
-```javascript
-
-
-try { bad(); } catch (e) { log(e.message); }
-log('here');
-
-/* console: 
-
-  _undefined is not defined 
-  here 
-
-*/
-
-```
-
-
 Jacket.js
 =========
 
@@ -94,10 +64,16 @@ Suppose you have a function, that throws an exception:
 ```javascript
 
 
-var fn = function () {
+var j = function () {
   return _undefined;
 }
-fn();
+
+```
+using [CoffeeScript](http://coffeescript.org):
+```coffeescript
+
+
+j = J -> _undefined
 
 ```
 
@@ -106,7 +82,7 @@ To get stack trace you might handle error by this way:
 ```javascript
 
 
-var handler = function(err) { /* notify your server about this error */ }
+var handler = function(err) { /* handle, notify your server about this error */ }
 var fn = function () {
   try {
     return _undefined;
@@ -120,40 +96,41 @@ var fn = function () {
 However, in this case you have a one function call, that supposed to be handled. 
 In case you need to handle and notify your server about all exceptions, 
 raised by you client side application, you must have an easy way of code' wrapping.  
-##### Jacket.js makes it real!
+#### Jacket.js makes it real!
 
-Javascript
 ```javascript
 
 
-/* just dress it up :) */
-var fn = Jacket(function () {
+var j = Jacket(function () { /* use J instead of Jacket for convenience */
   return _undefined;
 });
-/* then I'll use J instead of Jacket for convenience */
 
 ```
-Coffeescript
-```coffeescript
-J -> 
- _undefined
+
+
+Run
+```javascript
+
+
+j();
+
+/* console: 
+
+  Anonymous2793.constructor : _undefined is not defined 
+   - at http://localhost:8008/examples/example2785.js:3:10
+   - at http://localhost:8008/examples/example2786.js:2:1 
+
+*/
+
 ```
  
-##### Which type of objects can we wrap?
+#### Which type of objects can we wrap?
 Jacket.js is able to wrap classes, functions and objects. 
 After exception handling, it will be thrown on and the script 
 execution will be stopped by default. 
 
 ##### 2.1. Functions
-```javascript
-|example7|
-```m here');  /* will not be executed, because exception will be raised
-                             Setup negative Jacket.config.throw_errors 
-                             value to avoid script execution stopping
-                             and you'll see "I`m here" in your console. */
-
-```
-Lets play with anonymous functions
+Lets begin with anonymous functions
 ```javascript
 
 
@@ -161,41 +138,104 @@ var anonymous = function(msg) {
   if (!arguments.length) arguments = _undefined;
   console.log(msg);
 }
-
-J(anonymous)();
-// anonymous4.constructor : _undefined is not defined
-//  - at anonymous (http://localhost:8080/:77:46)
-//  - at wrapper (http://localhost:8080/jacket.js:470:50)
-//  - at http://localhost:8080/:80:21
+var j = J(anonymous);
+console.log(
+  j.wrapped, 
+  j !== anonymous,
+  j()
+);
 
 /* console: 
 
-  Anonymous14.constructor : _undefined is not defined 
-   - at anonymous (http://localhost:8008/examples/example8.js:3:38)
-   - at http://localhost:8008/examples/example8.js:7:13 
+  Anonymous2794.constructor : _undefined is not defined 
+   - at anonymous (http://localhost:8008/examples/example2787.js:3:38)
+   - at http://localhost:8008/examples/example2787.js:10:3 
+  true true undefined 
 
 */
 
 ```
+
+```javascript
+
+
+function sum(a, b) {
+  if (typeof a + typeof b !== 'numbernumber') {
+    throw new Error('Invalid arguments');  
+  }
+  this.result = a + b;
+  return this.result;
+}
+
+console.log(
+  ' - sum constructor: ', J(sum)(1, 1),            
+  '\n - sum instance:',  new J(sum)(1, 1)
+)
+
+J(sum)('oops!'); // will throw an error         
+                                        
+console.log('continue...');    // will not be executed 
+                               // if J.config.throw_errors is positive
+
+
+/* console: 
+
+   - sum constructor:  2 
+   - sum instance: {"result":2} 
+  sum.constructor : Invalid arguments 
+   - at sum (http://localhost:8008/examples/example2788.js:4:11)
+   - at http://localhost:8008/examples/example2788.js:15:7 
+  continue... 
+
+*/
+
+```
+
 
 As you can see, error message was modified and anonymous function was presented as "anonymous4". 
 We can name it! Function will lost its anonymity. How? New function will be created. Yaap...
 
 
 #### 2.2. Singletons
-
+Imagine that one of your class must be instantiated once, and you want to know if it happens.
+Then you can pass Error object to Jacket, and it will do the rest of work.
 ```javascript
-|example9|
-``` own methods, created in constructor? That's it. 
-    var _self = this; _.each(this, function (val, key) {
-      _self[key] = _wrapper.wrap(key, val);
-    });
 
-}
 
-named();
-// NamedFunction constructor : _undefined is not defined
-//  - at http://localhost:8080/:84:9
+var SingletonConstructor;
+
+(function() {
+  
+  var instance;
+  var crash = new Error('SingletonConstructor was called more than one time');
+  
+  SingletonConstructor = function() {
+    
+    if (typeof instance !== 'undefined') {
+      J.handle(crash); // throw an error if instance has been already created
+      ++instance.callcount;
+      return instance;
+    }
+    
+    this.callcount = 1;
+    return instance = this;
+  
+  };
+  
+})();
+
+new J(SingletonConstructor)(); // will create an instance
+console.log( new J(SingletonConstructor)() );
+
+/* console: 
+
+  SingletonConstructor was called more than one time 
+   - at http://localhost:8008/examples/example2789.js:7:15
+   - at http://localhost:8008/examples/example2789.js:22:3 
+  {"callcount":2} 
+
+*/
+
 ```
 
 ##### 2.3. CoffeeScript classes
@@ -236,12 +276,12 @@ new J(_Class)('call defInConst inside constructor')
 
   undefined 
   _Class.defInConst : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example10.js:5:14)
-   - at http://localhost:8008/examples/example10.js:15:17 
+   - at _Class.defInConst (http://localhost:8008/examples/example2790.js:5:14)
+   - at http://localhost:8008/examples/example2790.js:15:17 
   _Class.constructor : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example10.js:5:14)
-   - at _Class (http://localhost:8008/examples/example10.js:8:12)
-   - at http://localhost:8008/examples/example10.js:20:14 
+   - at _Class.defInConst (http://localhost:8008/examples/example2790.js:5:14)
+   - at _Class (http://localhost:8008/examples/example2790.js:8:12)
+   - at http://localhost:8008/examples/example2790.js:20:14 
 
 */
 

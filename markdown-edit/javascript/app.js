@@ -361,15 +361,24 @@ function rewrite(force) {
   }, i*50);
 }
 
+function htmlUnescape(value){
+    return String(value)
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+}
+
 function render(force) {
 
   // hide html
   $("#out").fadeOut("fast").empty();
 
-  var convertCallback = function(data,opttionCallback){
+  var convertCallback = function(data,opttionCallback){  
     $("#out")
     .addClass("display-none")
-    .append(data)
+    .append(htmlUnescape(data))
     .fadeIn("fast");
     opttionCallback();
     application.isRendering = false;
@@ -390,6 +399,8 @@ function render(force) {
     }
 
   }
+
+  console.log(application.md)
 
   switch (application.converter) {
     case "githubAPI":
@@ -414,7 +425,7 @@ function render(force) {
         // console.log("done");
         // render html data
         convertCallback(data,function(){
-        // $("#out").addClass("markdown-body");
+          $("#out").addClass("markdown-body");
         });
       })
       .fail(function(data){
