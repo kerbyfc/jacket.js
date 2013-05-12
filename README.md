@@ -28,15 +28,72 @@ Ask yourself:
 I want it badly, especially in production.
 <br/>If you think too, I suppose that jacket - is what you need.
 
-However, you can handle stack trace only by "try & catch" construction,
+
+
+Suppose you have a function, that throws an exception:
+```javascript
+var j = function () {
+  return _undefined;
+}
+
+```
+using [CoffeeScript](http://coffeescript.org):
+```CoffeeScript
+j = -> 
+  _undefined
+```
+You can handle stack trace only by "try & catch" construction,
 because window.onerror handler does not provide that.
+To get stack trace you might handle error by this way: 
+
+```javascript
+var handler = function(err) { /* handle, notify your server about this error */ }
+var fn = function () {
+  try {
+    return _undefined;
+  } catch (e) {
+    handler(e);
+  }
+}
+
+```
+
+However, in this case you have a one function call, that supposed to be handled. 
+In case you need to handle and notify your server about all exceptions, 
+raised by you client side application, you must have an easy way of code' wrapping. 
 
 * And what you might to do in this case? 
 * How to rid yourself from this boring work?
 * How to speed up searching of code mistakes?
 * Is there any way of easy code' wrapping?
 
-Actual questions, aren't they?
+Actual questions, aren't they? Let's look how Jacket can help us to answer them...
+
+```javascript
+var j = Jacket(function () { /* use J instead of Jacket for convenience */
+  return _undefined;
+});
+
+```
+
+Run
+```javascript
+j();
+
+/* console: 
+
+  Anonymous1027.constructor : _undefined is not defined 
+   - at http://localhost:8008/examples/example1016.js:2:10
+   - at http://localhost:8008/examples/example1017.js:1:58 
+
+*/
+
+```
+ 
+#### Which type of objects can we wrap?
+Jacket.js is able to wrap classes, functions and objects. 
+After exception handling, it will be thrown on and the script 
+execution will be stopped by default. 
 
 ##### 1.1. Pros & cons
 
@@ -207,60 +264,31 @@ console.log( Jacket.config );
 
 #### 3. Usage examples
 
-Suppose you have a function, that throws an exception:
-```javascript
-var j = function () {
-  return _undefined;
-}
 
-```
-using [CoffeeScript](http://coffeescript.org):
-```CoffeeScript
-j = J -> 
-  _undefined
-```
-
-To get stack trace you might handle error by this way: 
-
-```javascript
-var handler = function(err) { /* handle, notify your server about this error */ }
-var fn = function () {
-  try {
-    return _undefined;
-  } catch (e) {
-    handler(e);
-  }
-}
-
-```
-
-However, in this case you have a one function call, that supposed to be handled. 
-In case you need to handle and notify your server about all exceptions, 
-raised by you client side application, you must have an easy way of code' wrapping.  
-#### Jacket.js makes it real!
-
-```javascript
-var j = Jacket(function () { /* use J instead of Jacket for convenience */
-  return _undefined;
-});
-
-```
-
-
-Run
-```javascript
-|example688|
-```
- 
-#### Which type of objects can we wrap?
-Jacket.js is able to wrap classes, functions and objects. 
-After exception handling, it will be thrown on and the script 
-execution will be stopped by default. 
 
 ##### 3.1. Functions
 Let's begin with anonymous functions
 ```javascript
-|example689|
+var anonymous = function(msg) {
+  if (!arguments.length) arguments = _undefined;
+  console.log(msg);
+}
+var j = J(anonymous);
+console.log(
+  j.wrapped, 
+  j !== anonymous,
+  j()
+);
+
+/* console: 
+
+  Anonymous1030.constructor : _undefined is not defined 
+   - at anonymous (http://localhost:8008/examples/example1021.js:2:38)
+   - at http://localhost:8008/examples/example1021.js:9:3 
+  true true undefined 
+
+*/
+
 ```
 
 Named functions are considered as classes 
@@ -268,7 +296,36 @@ and have protected name property,
 that Jacket uses to extend
 exception message explanation.
 ```javascript
-|example690|
+function sum(a, b) {
+  if (typeof a + typeof b !== 'numbernumber') {
+    throw new Error('Invalid arguments');  
+  }
+  this.result = a + b;
+  return this.result;
+}
+
+console.log(
+  ' - sum constructor: ', J(sum)(1, 1),            
+  '\n - sum instance:',  new J(sum)(1, 1)
+)
+
+J(sum)('oops!'); // will throw an error         
+                                        
+console.log('continue...');    // will not be executed 
+                               // if J.config.throw_errors is positive
+
+
+/* console: 
+
+   - sum constructor:  2 
+   - sum instance: {"result":2} 
+  sum.constructor : Invalid arguments 
+   - at sum (http://localhost:8008/examples/example1022.js:3:11)
+   - at http://localhost:8008/examples/example1022.js:14:7 
+  continue... 
+
+*/
+
 ```
 
 
@@ -280,7 +337,40 @@ We can name it! Function will lost its anonymity. How? New function will be crea
 Imagine that one of your class must be instantiated once, and you want to know if it happens.
 Then you can pass Error object to Jacket, and it will do the rest of work.
 ```javascript
-|example691|
+var SingletonConstructor;
+
+(function() {
+  
+  var instance;
+  var crash = new Error('SingletonConstructor was called more than one time');
+  
+  SingletonConstructor = function() {
+    
+    if (typeof instance !== 'undefined') {
+      J.handle(crash); // throw an error if instance has been already created
+      ++instance.callcount;
+      return instance;
+    }
+    
+    this.callcount = 1;
+    return instance = this;
+  
+  };
+  
+})();
+
+new J(SingletonConstructor)(); // will create an instance
+console.log( new J(SingletonConstructor)() );
+
+/* console: 
+
+  SingletonConstructor was called more than one time 
+   - at http://localhost:8008/examples/example1023.js:6:15
+   - at http://localhost:8008/examples/example1023.js:21:3 
+  {"callcount":2} 
+
+*/
+
 ```
 
 ##### 3.3. CoffeeScript classes
@@ -292,7 +382,38 @@ If there are callings of these methods inside the constructor and one of them co
 exception should be catched inside constructor.
 
 ```javascript
-|example692|
+var _Class = (function _Class() {
+  function _Class(wishes) {
+    this.defInConst = function() {
+      return _undefined; 
+    }
+    if (wishes)
+      this.defInConst(); 
+  }
+  return _Class;
+}).call(window);
+
+new J(_Class)().defInConst();
+
+console.log('\n - compare theese outputs - \n');
+
+new J(_Class)('call defInConst inside constructor');
+
+/* console: 
+
+  _Class.defInConst : _undefined is not defined 
+   - at _Class.defInConst (http://localhost:8008/examples/example1024.js:4:14)
+   - at http://localhost:8008/examples/example1024.js:12:17 
+  
+   - compare theese outputs - 
+   
+  _Class.constructor : _undefined is not defined 
+   - at _Class.defInConst (http://localhost:8008/examples/example1024.js:4:14)
+   - at _Class (http://localhost:8008/examples/example1024.js:7:12)
+   - at http://localhost:8008/examples/example1024.js:16:14 
+
+*/
+
 ```
 
 
@@ -313,7 +434,11 @@ What functionality does it provide in case of error handling?
 
 ##### 4.3. Writing own handler
 ```javascript
-|example693|
+/* create additional handler */
+Jacket.handler = function(error_object, extended_error_msg_string, stacktace_array, callstack_array) {
+  /* your code */
+}
+
 ```
 
 
@@ -340,5 +465,17 @@ method arguments and its result as arguments
 
 
 ```javascript
-|example694|
+J(function my(a){return a+1;}, function(scope, name, method, args, result) {
+  /* it's usefull to implement Backbone.Events for example */
+  console.log(arguments);
+})(1);
+/* WILL OUTPUT TO CONSOLE */
+['[Object object]', 'my', 'constructor', [1], 2]
+
+/* console: 
+
+  {"0":"my","1":"constructor","2":Object} 
+
+*/
+
 ```

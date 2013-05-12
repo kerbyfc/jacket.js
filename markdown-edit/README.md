@@ -28,15 +28,60 @@ Ask yourself:
 I want it badly, especially in production.
 <br/>If you think too, I suppose that jacket - is what you need.
 
-However, you can handle stack trace only by "try & catch" construction,
+
+
+Suppose you have a function, that throws an exception:
+```javascript
+var j = function () {
+  return _undefined;
+}
+```
+using [CoffeeScript](http://coffeescript.org):
+```CoffeeScript
+j = -> 
+  _undefined
+```
+You can handle stack trace only by "try & catch" construction,
 because window.onerror handler does not provide that.
+To get stack trace you might handle error by this way: 
+
+```javascript
+var handler = function(err) { /* handle, notify your server about this error */ }
+var fn = function () {
+  try {
+    return _undefined;
+  } catch (e) {
+    handler(e);
+  }
+}
+```
+
+However, in this case you have a one function call, that supposed to be handled. 
+In case you need to handle and notify your server about all exceptions, 
+raised by you client side application, you must have an easy way of code' wrapping. 
 
 * And what you might to do in this case? 
 * How to rid yourself from this boring work?
 * How to speed up searching of code mistakes?
 * Is there any way of easy code' wrapping?
 
-Actual questions, aren't they?
+Actual questions, aren't they? Let's look how Jacket can help us to answer them...
+
+```javascript
+var j = Jacket(function () { /* use J instead of Jacket for convenience */
+  return _undefined;
+});
+```
+
+Run
+```javascript
+j();
+```
+ 
+#### Which type of objects can we wrap?
+Jacket.js is able to wrap classes, functions and objects. 
+After exception handling, it will be thrown on and the script 
+execution will be stopped by default. 
 
 ##### 1.1. Pros & cons
 
@@ -192,52 +237,7 @@ console.log( Jacket.config );
 
 #### 3. Usage examples
 
-Suppose you have a function, that throws an exception:
-```javascript
-var j = function () {
-  return _undefined;
-}
-```
-using [CoffeeScript](http://coffeescript.org):
-```CoffeeScript
-j = J -> 
-  _undefined
-```
 
-To get stack trace you might handle error by this way: 
-
-```javascript
-var handler = function(err) { /* handle, notify your server about this error */ }
-var fn = function () {
-  try {
-    return _undefined;
-  } catch (e) {
-    handler(e);
-  }
-}
-```
-
-However, in this case you have a one function call, that supposed to be handled. 
-In case you need to handle and notify your server about all exceptions, 
-raised by you client side application, you must have an easy way of code' wrapping.  
-#### Jacket.js makes it real!
-
-```javascript
-var j = Jacket(function () { /* use J instead of Jacket for convenience */
-  return _undefined;
-});
-```
-
-
-Run
-```javascript
-j();
-```
- 
-#### Which type of objects can we wrap?
-Jacket.js is able to wrap classes, functions and objects. 
-After exception handling, it will be thrown on and the script 
-execution will be stopped by default. 
 
 ##### 3.1. Functions
 Let's begin with anonymous functions
