@@ -116,9 +116,9 @@ j();
 
 /* console: 
 
-  Anonymous2793.constructor : _undefined is not defined 
-   - at http://localhost:8008/examples/example2785.js:3:10
-   - at http://localhost:8008/examples/example2786.js:2:1 
+  Anonymous3553.constructor : _undefined is not defined 
+   - at http://localhost:8008/examples/example3545.js:3:10
+   - at http://localhost:8008/examples/example3546.js:2:1 
 
 */
 
@@ -130,7 +130,7 @@ After exception handling, it will be thrown on and the script
 execution will be stopped by default. 
 
 ##### 2.1. Functions
-Lets begin with anonymous functions
+Let's begin with anonymous functions
 ```javascript
 
 
@@ -147,15 +147,19 @@ console.log(
 
 /* console: 
 
-  Anonymous2794.constructor : _undefined is not defined 
-   - at anonymous (http://localhost:8008/examples/example2787.js:3:38)
-   - at http://localhost:8008/examples/example2787.js:10:3 
+  Anonymous3554.constructor : _undefined is not defined 
+   - at anonymous (http://localhost:8008/examples/example3547.js:3:38)
+   - at http://localhost:8008/examples/example3547.js:10:3 
   true true undefined 
 
 */
 
 ```
 
+Named functions are considered as classes 
+and have protected name property, 
+that Jacket uses to extend
+exception message explanation.
 ```javascript
 
 
@@ -183,8 +187,8 @@ console.log('continue...');    // will not be executed
    - sum constructor:  2 
    - sum instance: {"result":2} 
   sum.constructor : Invalid arguments 
-   - at sum (http://localhost:8008/examples/example2788.js:4:11)
-   - at http://localhost:8008/examples/example2788.js:15:7 
+   - at sum (http://localhost:8008/examples/example3548.js:4:11)
+   - at http://localhost:8008/examples/example3548.js:15:7 
   continue... 
 
 */
@@ -230,8 +234,8 @@ console.log( new J(SingletonConstructor)() );
 /* console: 
 
   SingletonConstructor was called more than one time 
-   - at http://localhost:8008/examples/example2789.js:7:15
-   - at http://localhost:8008/examples/example2789.js:22:3 
+   - at http://localhost:8008/examples/example3549.js:7:15
+   - at http://localhost:8008/examples/example3549.js:22:3 
   {"callcount":2} 
 
 */
@@ -276,12 +280,12 @@ new J(_Class)('call defInConst inside constructor')
 
   undefined 
   _Class.defInConst : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example2790.js:5:14)
-   - at http://localhost:8008/examples/example2790.js:15:17 
+   - at _Class.defInConst (http://localhost:8008/examples/example3550.js:5:14)
+   - at http://localhost:8008/examples/example3550.js:15:17 
   _Class.constructor : _undefined is not defined 
-   - at _Class.defInConst (http://localhost:8008/examples/example2790.js:5:14)
-   - at _Class (http://localhost:8008/examples/example2790.js:8:12)
-   - at http://localhost:8008/examples/example2790.js:20:14 
+   - at _Class.defInConst (http://localhost:8008/examples/example3550.js:5:14)
+   - at _Class (http://localhost:8008/examples/example3550.js:8:12)
+   - at http://localhost:8008/examples/example3550.js:20:14 
 
 */
 
