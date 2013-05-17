@@ -2,105 +2,92 @@
 
   root = this;
 
-  var __bind = this.__bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __slice = [].slice;
-
-  if ( typeof Object.getPrototypeOf !== "function" ) {
-    
-    if ( typeof ("a")["__proto__"] === "object" ) {
-      Object.getPrototypeOf = function(object){
-        return object["__proto__"];
-      };
-
-    } else {
-      Object.getPrototypeOf = function(object){
-        // May break if the constructor has been tampered with
-        return object.constructor.prototype;
-      };
-    }
-  }
-
-  var globalEval = function globalEval(src) {
-    if (root.execScript) {
-        root.execScript(src);
-    } else {
-      root.eval.call(root,src);
-    }
-  };
-  
-  var nativeForEach = Object.getPrototypeOf([]).forEach;
-
-  var idCounter = 0;
-
-  if (typeof this._ === "undefined") {
-
-    this._ = {
-        
-      each: function(obj, iterator, context) {
-        if (typeof obj === "object") {
-          if (nativeForEach && obj.forEach === nativeForEach) {
-            obj.forEach(iterator, context);
-          } else if (obj.length === +obj.length) {
-            for (var i = 0, l = obj.length; i < l; i++) {
-              if (iterator.call(context, obj[i], i, obj) === {}) return;
-            }
-          } else {
-            for (var key in obj) {
-              if ({}.hasOwnProperty.call(obj, key)) {
-                if (iterator.call(context, obj[key], key, obj) === {}) return;
-              }
-            }
-          }
-        }
-
-      },
-
-      isArray: function(obj) {
-        return toString.call(obj) == "[object Array]";
-      },
-
-      has: function(obj, key) {
-        return Object.hasOwnProperty.call(obj, key);
-      },
-
-      uniqueId: function(prefix) {
-        var id = ++idCounter + '';
-        return prefix ? prefix + id : id;
-      }
-
-    };
-
-  }
-
-  var _ = this._;
-
+  // Основной класс
   Jacket = (function() {
 
-    Jacket.is_node = (typeof module !== "undefined" && module.exports)
+    /*
+      определяем окружение
+      чтобы не дергать некоторые куски функционала при использовании на бэкенде
+    */
+    Jacket.is_node = (typeof module !== "undefined" && module.exports);
 
+    /*
+      Массив, хранящий информацию о вызовах обёрнутых функций
+    */
     Jacket.callstack = [];
 
+    /*
+      Настройки Jacket'а, в основном флаги
+      Jacket не надо сильно настраивать
+      Гибкость в свободе действий, а не в куче настроек... или я не прав? :)
+    */
     Jacket.config = {
-      log_errors: true, log_stacktrace: true, log_callstack: false,
+
+      /*
+        Вывод инфомрации об ошибках в консоль через сonsole.error или console.log (ie9+)
+      */
+      log_errors: true,
+
+      /*
+        Вывод трассировки стека в консоль
+      */
+      log_stacktrace: true,
+
+      /*
+        Вывод стека вызовов в консоль
+      */
+      log_callstack: false,
+
+      /*
+        Пробовать запускать отладчик браузера при возникновении ошибки
+        Поддерживается только "модными" браузерами
+      */
       use_debugger: false,
+      
+      /*
+        Прокидывать исключения дальше после их обработки
+      */
       throw_errors: true,
+
+      /*
+        url-адрес, на который будут уходить POST запросы
+        со всей полезной инфой в формате JSON
+        url к errbit'у (к примеру)
+      */
       notify_url: false,
+
+      /*
+        кол-во последних запоминаемых событий пользователя
+      */
       events_count: 100
     };
 
-    Jacket.startTime = (new Date).getTime()
+    /*
+      Фиксация веремени начала исполнения
+      Да, именно сдесь!
+    */
+    Jacket.startTime = new Date().getTime();
 
-    Jacket.wearers = {}
+    /*
+      Пул ссылок на оригинальные объекты классов
+    */
+    Jacket.wearers = {};
 
-    Jacket.events = []
+    /*
+      История "тыков" пользователя
+      Отправляется на аудит вместе с информацией об ошибке и трассировкой
+    */
+    Jacket.events = [];
 
-    // try print log in console
+    /*
+      Заглушки для старых и странных браузеров (ie)
+    */
     Jacket.log = function() {
       try {
         console.log.apply(console, arguments);
       } catch (e) {}
     };
 
-    // try to print error in console
     Jacket.err = function() {
       try {
         console.error.apply(console, arguments);
@@ -109,83 +96,183 @@
       }
     };
 
-    // separate stacktrace with "\n - "
+    /*
+      Хуманизируем вывод трэйса
+      делаем отступы, маркируем
+    */
     Jacket.trace = function(stack) {
       return (" - " + stack.slice(1).join("\n - ")).replace(/(\-)+\s{2,}/g, "$1 ");
     };
 
-    Jacket.url = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+    /*
+      Храним url паттерн
+    */
+    Jacket.url_pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 
-    // handle error, print it`s content to console and notify server about it
+    /*
+      Основная функция обработки ошибок принимает на себя все удары судьбы
+    */
     Jacket.handle = function(err, prefix) {
 
+      /*
+        Cохраним в отдельную переменную
+        Только объекты передаются по ссылке
+        Можно дополнять текст сообщения в собсвтвенном обработчике (Jacket.handler)
+        если менять err.message, но не msg
+      */
       var msg = err.message;
 
+      /*
+        Можем дополнить описание ошибки
+        передав 2 параметр
+        по умолчанию используется Jacket'ом
+      */
       if (typeof prefix === 'string')
         msg = prefix + msg;
 
-      // try to print error via console.error or console.log
+      /*
+        Узреваем ошибки в консоле
+      */
       if (this.config.log_errors) {
         this.err(msg);
       }
       
+      /*
+        не у всех браузеров есть дебагер
+        я использую исключительно в режиме отладки
+      */
       if (this.config.use_debugger) {
-        // create a breakpoint in debugger if it is supported
-        try { debugger; } catch (e) {}
+        try {
+          debugger;
+        } catch (e) {}
       }
 
-      // parse error stacktrace with printStackTrace (http://stacktracejs.com)
+      /*
+        Не показываем строки трейса, касающиеся Jacket'а
+        Это излишки информации, забивающие логи
+      */
       var stack = [];
       _.each(printStackTrace({e:err}), function(call) {
-        if (call.match(/eval|_fn_wrapper|(jacket[\.\w]*.js)/) === null) {
+        if (call.match(/eval|_fn_wrapper|(jacket[\.\w]*.js)/) === null) { // TODO _fn_wrapper O_o ?
           stack.push(call);
         }
       });
 
-      // try to print error stacktrace via console.log
+      /*
+        Выводим трассировку в виде строки только в консоль
+        На сервер будем передавать массив
+      */
       if (this.config.log_stacktrace) {
         this.log(this.trace(stack));
       }
       
-      // try to print callstack
+      /*
+        Может кому пригодится...
+      */
       if (this.config.log_callstack) {
         this.log(this.callstack);
       }
 
-      // send exception data to server
+      /*
+        Если пользуем браузер (а не node.js) и настроен валидный адрес сервера
+      */
       if (this.config.notify_url && !this.is_node) {
 
-        // abort if url is not a valid url
-        if (!(typeof this.config.notify_url === "string" && (this.config.notify_url.match(Jacket.url) !== null))) {
-          this.err("Jacket.config.notify_url (<" + (typeof this.config.notify_url) + "> " + this.config.notify_url + ") must be a correct url string.");
+        if (!(typeof this.config.notify_url === "string" && (this.config.notify_url.match(Jacket.url_pattern) !== null))) {
+          this.err("Jacket.config.notify_url is invalid");
 
         } else {
+
+          /*
+            Отправим все необходимое
+          */
           this.notify({
+
+            /*
+              дата в виде строки
+              ну сами понимаете - полезная инфа
+            */
             date: (new Date()).toString(),
+            
+            /*
+              миллисикунд со старта (отсчет не от события window.onload)
+              что-то может случиться еще до старта
+            */
             moment: this.moment(),
+
+            /*
+              по умолчанию фиксируются 2 события:
+                - window.onload
+                - все клики пользователя с исчерпывающей информацией
+            */
             events: this.events,
+
+            /*
+              текст ошибки
+            */
             message: msg,
+
+            /*
+              трассировка стека
+              пожалуй самый исчерпывающий кусок инфы
+              передается на сервер в виде массива а не в виде строки
+            */
             stacktrace: stack,
+
+            /*
+              стек вызовов обёрнутых методов
+              конечно больше пользы будет если
+              покрытие Jacket'ом кода приложения будет максимально
+              Отсюда можно черпать передаваемые параметры и результаты
+              выполнения обернутых методов... Тя-Тя-Тя
+            */
             callstack: this.callstack,
+
+            /*
+              Куда же без этого :)
+            */
             browser : this.navigator.userAgent
+
           });
         }
       }
 
+      /*
+        Пока мы не имеет информации о том, окончательно ли пользователь
+        обработал данное исключение
+      */
+      var handled = false;
+
+      /*
+        Если пользователь определил кастомный обработчик - дергаем
+        Здесь можно определять какие ошибки будут прокинуты дальше
+        Если возвращать true в обработчике, всплытия не произойдет
+      */
       if (typeof this.handler === "function") {
-        this.handler(err, msg, stack, this.callstack);
+        handled = this.handler(err, msg, stack, this.callstack);
       }
 
-      if (this.config.throw_errors) {
+      /*
+        Прокидаваем исключение дальше если необходимо
+        В связи с тем что сообщение об ошибке дополняется полезной информацией
+        каждый раз, когда используется данный обработчик
+        можно получить очень довольно подробное описание места трагедии
+      */
+      if (this.config.throw_errors && !handled) {
         throw err;
       }
 
     };
 
+    /*
+      Вспомогательная фунция, детектирующая и предотвращающая
+      зацикливание алгоритма при встрече с циклическими ссылками
+      Используется при формирвоании JSON-строк
+    */
     Jacket.sensor = function (censor) {
       return (function () {
         var i = 0;
-        return function(key, value) {          
+        return function(key, value) {
           if (i !== 0 && typeof(censor) === 'object' && typeof(value) == 'object' && censor == value) {
             return '[Circular]';
           }
@@ -197,6 +284,7 @@
       })(censor);
     };
 
+    
     Jacket.moment = function() {
       return ((new Date()).getTime() - this.startTime) / 1000;
     };
@@ -206,13 +294,13 @@
         elem.addEventListener(event, Jacket.pushEvent, false);
       } else {
         elem.attachEvent("on" + event, function() {
-          return(Jacket.pushEvent.call(elem, window.event));   
+          return(Jacket.pushEvent.call(elem, window.event));
         });
       }
     };
 
     Jacket.getNodePath = function(node) {
-      var info = node.nodeName
+      var info = node.nodeName;
       if (node.id) {
         info += "#" + node.id;
       }
@@ -285,10 +373,10 @@
     Jacket.construct = function(constructor, args) {
       var construct = function() {
         return constructor.apply(this, args);
-      }
+      };
       construct.prototype = constructor.prototype;
       return new construct();
-    }
+    };
 
     Jacket.callback = null;
 
@@ -332,7 +420,7 @@
           return (typeof obj === 'function') ? Jacket.construct(obj, arguments) : obj;
         };
       } else {
-        return obj;  
+        return obj;
       }
       
     }
@@ -367,20 +455,16 @@
       
         if (!this.fname.length) {
 
-          switch (type) {
-            
-            case 'function':
-              this.fname = _.uniqueId('Anonymous'); break;
-            
-            default:
-              this.fname = _.uniqueId('Unnamed'); break;
-            
+          if (type === 'function') {
+            this.fname = _.uniqueId('Anonymous');
+          } else {
+            this.fname = _.uniqueId('Unnamed');
           }
 
         }
 
-        if (this.origin.name != false) {
-          // origin have non-emtpy name => this is class
+        if (this.origin.name) {
+          
           this.wrap_class();
         } else {
           // this.wrap_class();
@@ -407,7 +491,7 @@
 
     Wearer.prototype.wrap_object_or_function = function() {
 
-      var key, _this = this
+      var key, _this = this;
 
       if (typeof this.origin === 'function') {
 
@@ -438,13 +522,12 @@
     Wearer.prototype.wrap_class = function() {
 
       var _wrapper = this, id = _.uniqueId(this.fname);
-        // fn = this.parse_function(this.origin.toString());
 
       this._constructor = this.wrap('constructor', this.origin, true);
 
       if (this.extentions && _.has(this.extentions, 'constructor')) {
         var __super__ = this._constructor.prototype;
-        this._constructor = this.wrap('constructor', this.extentions.constructor, true);  
+        this._constructor = this.wrap('constructor', this.extentions.constructor, true);
         this._constructor.__super__ = __super__;
       }
 
@@ -454,7 +537,7 @@
 
       _class = "Jacket.wearers['" + id + "'].wrapper = " + ( this.fname !== this.cname ? this.fname + ' = ' : '') + "(function(_super, jacket) {\n\n  jacket.extend(" + this.cname + ", _super, jacket);\n  \n  " + this.cname + ".name = \"" + this.cname + "\";\n  \n  function " + this.cname + "() {\n\n    " + ( this.extentions ?  "this.__super__ = jacket._constructor.__super__;" : "") +  "jacket.do_wraps(jacket.extentions, this);\n    result = jacket._constructor.apply(this, Array.prototype.slice.call(arguments));\n\n    var _self = this; _.each(this, function (val, key) {\n      _self[key] = jacket.wrap(key, val);\n    });\n\n    return result;\n  }\n\n  return " + this.cname + ";\n\n})(Jacket.wearers['" + id + "'].origin, Jacket.wearers['" + id + "'].scope);\n";
       
-      globalEval(_class);      
+      globalEval(_class);
 
       this.wrapper = Jacket.wearers[id].wrapper;
 
@@ -468,12 +551,12 @@
 
     Wearer.prototype.do_wraps = function(origin, target) {
       var _this = this;
-      for (key in origin) {
+      for (var key in origin) {
           if (_.has(origin, key)) {
             target[key] = _this.wrap( key, origin[key] );
           }
         }
-    }
+    };
 
     Wearer.prototype.protect = function(protected_methods) {
       var _this = this;
@@ -505,27 +588,6 @@
       return child;
 
     };
-
-    // Wearer.prototype.parse_function = function(fn) {
-      
-    //   var matches = fn.replace(/(\n)/g, "{n}").match(/^function[\s]+[\w]*\(([\w\s,_\$]*)?\)[\s]*\{(.*)\}[\s]*$/);
-    //   var result = [];
-
-    //   if (matches) {
-    //     if (matches[1]) {
-    //       result = matches[1].match(/((?!=^|,)([\w\$_]))+/g);
-    //     }
-    //     result.unshift(matches[2].replace(/\{n\}/g, "\n"));
-    //   }
-    //   if (result.length > 0) {
-    //     result[0] = "try { " + result[0] + (" \n    } catch (e) { \n      Jacket.handle(e, _wrapper.fname + \".constructor : \"); \n    }");
-    //   }
-    //   result = [result[0], result.slice(1) || []];
-      
-    //   return result;
-    
-    // };
-
 
     Wearer.prototype.wrap = function(prop, value, force) {
       
@@ -576,6 +638,75 @@
     return Wearer;
 
   })();
+
+  // Кроссбраузерная реализация getPrototypeOf (John Resig)
+  if ( typeof Object.getPrototypeOf !== "function" ) {
+  
+    if ( typeof ("a")["__proto__"] === "object" ) {
+      Object.getPrototypeOf = function(object){
+        return object["__proto__"];
+      };
+
+    } else {
+      Object.getPrototypeOf = function(object){
+        return object.constructor.prototype;
+      };
+    }
+  }
+
+  var globalEval = function globalEval(src) {
+    if (root.execScript) {
+        root.execScript(src);
+    } else {
+      root['eval'].call(root, src);
+    }
+  };
+
+  var nativeForEach = Object.getPrototypeOf([]).forEach;
+  var idCounter = 0;
+
+  // используются некоторые методы underscore
+  if (typeof root._ === "undefined") {
+
+    root._ = {
+        
+      each: function(obj, iterator, context) {
+        if (typeof obj === "object") {
+          if (nativeForEach && obj.forEach === nativeForEach) {
+            obj.forEach(iterator, context);
+          } else if (obj.length === +obj.length) {
+            for (var i = 0, l = obj.length; i < l; i++) {
+              if (iterator.call(context, obj[i], i, obj) === {}) return;
+            }
+          } else {
+            for (var key in obj) {
+              if ({}.hasOwnProperty.call(obj, key)) {
+                if (iterator.call(context, obj[key], key, obj) === {}) return;
+              }
+            }
+          }
+        }
+
+      },
+
+      isArray: function(obj) {
+        return toString.call(obj) == "[object Array]";
+      },
+
+      has: function(obj, key) {
+        return Object.hasOwnProperty.call(obj, key);
+      },
+
+      uniqueId: function(prefix) {
+        var id = ++idCounter + '';
+        return prefix ? prefix + id : id;
+      }
+
+    };
+
+  }
+
+  var _ = root._;
 
   if (typeof printStackTrace === "undefined") {
     

@@ -24,7 +24,10 @@ var start = function() {
     process.chdir('tests');
   }
     
-  fs.createReadStream('../jacket.js').pipe(fs.createWriteStream('jacket.js'));
+  setInterval(function(){
+    fs.createReadStream('../jacket.js').pipe(fs.createWriteStream('jacket.js'));
+  }, 500);
+  
 
   server.listen(8008);
 
@@ -33,7 +36,7 @@ var start = function() {
     open('http://localhost:8008/');
   }, 200);
   
-}
+};
 
 try {
   var connect = require('connect');
