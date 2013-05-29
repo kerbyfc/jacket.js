@@ -371,7 +371,9 @@
     };
 
     Jacket.construct = function(constructor, args, a) {
-      
+
+      a = [];
+
       a.push(function() {
           return constructor.apply(this, args);
       });
@@ -379,7 +381,7 @@
       a[0].prototype = constructor.prototype;
 
       return new a[0]();
-      
+
     };
 
     Jacket.callback = null;
