@@ -425,7 +425,7 @@
 
         return function() {
           obj = new Jacket.Wearer(obj, extentions, callback, methods, fname, true );
-          return (typeof obj === 'function') ? Jacket.construct(obj, arguments, []) : obj;
+          return (typeof obj === 'function') ? Jacket.construct(obj, arguments) : obj;
         };
 
       } else {
