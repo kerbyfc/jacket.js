@@ -1,4 +1,4 @@
-describe 'Pure javascript', -> 
+describe 'Базовые объекты javascript', -> 
 
   object = {}
   anonymous = -> 'anonymous'
@@ -11,26 +11,26 @@ describe 'Pure javascript', ->
     obj.method = -> 'method'
     obj.prop = 'prop'
 
-    do (obj) ->
+    do (obj) =>
 
       name = ( if typeof obj is 'function' and obj.name is '' then 'anonymous ' else '' ) + ' ' + obj.constructor.name
       w = J(obj)
 
-      describe 'Jacket ( ' + name + ' )', -> 
+      describe 'выражение Jacket ( ' + name + ' )', -> 
 
-        it 'should return new object', -> 
+        it 'должено вернуть новый объект', -> 
           w.should.not.eq obj
           w.should.be.instanceOf Object
 
-        describe 'should have', ->
+        describe 'который должен иметь', ->
           
-          it 'copies of origin object properties', -> 
+          it 'копии свойств базового объекта', -> 
             w.should.have.ownProperty 'prop'
             w.prop.should.equal obj.prop
             w.prop = false
             obj.prop.should.be.ok
 
-          it 'wrapped origin object methods', -> 
+          it 'обернутые методы базового объекта', -> 
             w.should.have.ownProperty 'method'
             w.method.toString().should.not.eq obj.method.toString()
             w.method.should.match Helpers.wrapped_function

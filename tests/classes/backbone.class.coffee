@@ -1,4 +1,4 @@
-window.BackboneView = J Backbone.View, 
+window.Examples.BackboneView = Backbone.View.extend
 
   constructor: -> 
     fsdf

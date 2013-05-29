@@ -1,24 +1,29 @@
-describe 'Backbone.View.extend', -> 
+describe 'Расширение классов на примере Backbone', -> 
 
-  before ->
-    @W = Jacket(BackboneView)
+  window.BackboneExtend = -> 
+    spy = sinon.spy()
+    return {
+      constructor: -> this.__super__.constructor.apply(this, arguments); spy();
+      extended: true
+      spy: spy
+    }
 
-  describe 'Jacket ( BackboneView )', -> 
+  describe "выражение new (Jacket ( Backbone.View, extend ))", -> 
 
-    it 'should return new class',  ->
-      @W.should.not.equal BackboneView
+    it 'возвращает экземпляр класса Function[n]', ->
+      view = new (Jacket(Backbone.View))
+      view.constructor.name.should.match /^Function[\d]+$/i
 
-    describe 'should have', -> 
-
-      it 'correct name', -> 
-        @W.name.should.equal 'OLOL'
-
-      it 'wrapped prototype methods of __super__', -> 
-        for own prop, val of @W.prototype
-          if typeof val is 'function' and prop isnt 'constructor'
-            console.log ' >>>> ', prop, val
-            val.should.match Helpers.wrapped_function 
-
-    
+    it 'расширяет класс объектом extend', ->
+      view = new (Jacket Backbone.View, BackboneExtend())
+      view.should.have.ownProperty 'extended'
       
-  
+    it 'вызывает метод constructor из расширения (extend.constructor)', -> 
+      extend = BackboneExtend()
+      view = new( Jacket Backbone.View, extend )
+      view.should.have.ownProperty 'extended'
+      extend.spy.callCount.should.eq 1
+
+    it 'присваивает Backbone.View.prototype свойству __super__', ->
+      view = new (Jacket Backbone.View, BackboneExtend())
+      view.__super__.should.eq Backbone.View.prototype
