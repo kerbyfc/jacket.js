@@ -370,12 +370,16 @@
       
     };
 
-    Jacket.construct = function(constructor, args) {
-      var jacket = function() {
-        return constructor.apply(this, args);
-      };
-      jacket.prototype = constructor.prototype;
-      return new jacket();
+    Jacket.construct = function(constructor, args, a) {
+      
+      a.push(function() {
+          return constructor.apply(this, args);
+      });
+
+      a[0].prototype = constructor.prototype;
+
+      return new a[0]();
+      
     };
 
     Jacket.callback = null;
@@ -394,6 +398,8 @@
         if (typeof extentions !== 'object') {
           methods = extentions;
           extentions = false;
+        } else {
+          extentions = _.extend({}, extentions);
         }
         
         if (typeof callback !== "function" && typeof methods === 'function') {
@@ -417,7 +423,7 @@
 
         return function() {
           obj = new Jacket.Wearer(obj, extentions, callback, methods, fname, true );
-          return (typeof obj === 'function') ? Jacket.construct(obj, arguments) : obj;
+          return (typeof obj === 'function') ? Jacket.construct(obj, arguments, []) : obj;
         };
 
       } else {
@@ -551,7 +557,9 @@
       var _wrapper = this, id = _.uniqueId(this.fname);
 
       if (this.extentions && _.has(this.extentions, 'constructor')) {
-        this._constructor = this.wrap('constructor', this.extentions.constructor, true);
+        this.extentions[this.fname] = this.extentions.constructor;
+        delete this.extentions.constructor;
+        this._constructor = this.wrap('constructor', this.extentions[this.fname], true);
       } else {
         this._constructor = this.wrap('constructor', this.origin, true);
       }
