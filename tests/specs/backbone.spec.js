@@ -65,7 +65,11 @@
     return describe("выражение new Jacket ( 'MyView', Backbone.View, extend )()", function() {
       it('возвращает экземпляр класса MyView', function() {
         var view;
-        view = new Jacket('MyView', Backbone.View)();
+        view = new Jacket('MyView', Backbone.View, {
+          constructor: function() {
+            return false;
+          }
+        })();
         return view.constructor.name.should.match(/^MyView$/i);
       });
       it('расширяет класс объектом extend', function() {

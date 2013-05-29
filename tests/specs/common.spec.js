@@ -4,7 +4,15 @@
   describe('Базовые объекты javascript', function() {
     var anonymous, obj, object, objects, _i, _len, _results,
       _this = this;
-    object = {};
+    object = {
+      constructor: function() {
+        this.i = 1;
+        return console.log('HERE', this);
+      },
+      method2: function() {
+        return console.log("222", this.i);
+      }
+    };
     anonymous = function() {
       return 'anonymous';
     };
@@ -19,9 +27,18 @@
       };
       obj.prop = 'prop';
       _results.push((function(obj) {
-        var name, w;
+        var name, w, ww, ww2;
         name = (typeof obj === 'function' && obj.name === '' ? 'anonymous ' : '') + ' ' + obj.constructor.name;
         w = J(obj);
+        ww = new w();
+        ww2 = J('TEST', obj, {
+          ext: true
+        });
+        ww2 = new ww2;
+        if (ww2.method2 != null) {
+          ww2.method2();
+        }
+        console.log(ww2);
         return describe('выражение Jacket ( ' + name + ' )', function() {
           it('должено вернуть новый объект', function() {
             w.should.not.eq(obj);

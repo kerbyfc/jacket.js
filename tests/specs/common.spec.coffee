@@ -1,6 +1,12 @@
 describe 'Базовые объекты javascript', -> 
 
-  object = {}
+  object = {
+    constructor: -> 
+      this.i = 1
+      console.log 'HERE', this
+    method2: -> 
+      console.log "222", this.i
+  }
   anonymous = -> 'anonymous'
   `var named = function named() {return false;}`
 
@@ -15,6 +21,15 @@ describe 'Базовые объекты javascript', ->
 
       name = ( if typeof obj is 'function' and obj.name is '' then 'anonymous ' else '' ) + ' ' + obj.constructor.name
       w = J(obj)
+      
+      # TODO separate --- 
+      ww = new w()
+      ww2 = J('TEST', obj, {ext:true})
+      ww2 = new ww2
+      if ww2.method2?
+        ww2.method2()
+      console.log ww2
+      # TODO separate --- 
 
       describe 'выражение Jacket ( ' + name + ' )', -> 
 

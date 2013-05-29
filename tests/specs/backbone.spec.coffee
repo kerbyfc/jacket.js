@@ -3,7 +3,7 @@ describe 'Расширение классов на примере Backbone', ->
   window.BackboneExtend = -> 
     spy = sinon.spy()
     return {
-      constructor: -> 
+      constructor: ->
         this.__super__.constructor.apply(this, arguments); spy();
       extended: true
       spy: spy
@@ -52,7 +52,7 @@ describe 'Расширение классов на примере Backbone', ->
   describe "выражение new Jacket ( 'MyView', Backbone.View, extend )()", -> 
 
     it 'возвращает экземпляр класса MyView', ->
-      view = new Jacket('MyView', Backbone.View)()
+      view = new Jacket('MyView', Backbone.View, {constructor: -> false})()
       view.constructor.name.should.match /^MyView$/i
 
     it 'расширяет класс объектом extend', ->

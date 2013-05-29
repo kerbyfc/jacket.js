@@ -465,7 +465,7 @@
         this.protect(protected_methods);
       
         if (!this.fname.length) {
-          this.fname = _.uniqueId(origin.constructor.name);
+          this.fname = _.uniqueId(origin.constructor.name || 'Function');
 
         }
 
@@ -474,7 +474,7 @@
           мы вызываем через new
           будет создан новый класс
         */
-        if (instantiatable || (_.keys(this.origin.prototype || Object.getPrototypeOf(this.origin)).length) || origin.name) {
+        if (instantiatable || (_.keys(this.origin.prototype || Object.getPrototypeOf(this.origin)).length) || origin.name || _.has(origin, 'constructor')) {
           this.wrap_class();
         
         /*
@@ -554,9 +554,15 @@
 
     Wearer.prototype.wrap_class = function() {
 
-      console.log("WRAP CLASS", this.fname);
+      console.log("WRAP CLASS", this.fname, typeof this.origin);
 
       var _wrapper = this, id = _.uniqueId(this.fname);
+
+      if (typeof this.origin === 'object') {
+        tmp = this.origin;
+        this.origin = tmp.constructor;
+        this.origin.prototype = tmp;
+      }
 
       if (this.extentions && _.has(this.extentions, 'constructor')) {
         this.extentions[this.fname] = this.extentions.constructor;
@@ -567,6 +573,8 @@
       }
 
       this._constructor.__super__ = this.origin.prototype;
+      
+      console.log(this._constructor.prototype);
 
       Jacket.wearers[id] = {scope: _wrapper, origin: this.origin};
 
