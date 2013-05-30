@@ -560,7 +560,7 @@
 
       if (typeof this.origin === 'object') {
         tmp = this.origin;
-        this.origin = tmp.constructor;
+        this.origin = _.has(tmp, 'constructor') ? tmp.constructor : function(){};
         this.origin.prototype = tmp;
       }
 
