@@ -5,10 +5,6 @@
     var anonymous, obj, object, objects, _i, _len, _results,
       _this = this;
     object = {
-      constructor: function() {
-        this.i = 1;
-        return console.log('HERE', this);
-      },
       method2: function() {
         return console.log("222", this.i);
       }

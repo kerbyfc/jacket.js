@@ -1,9 +1,10 @@
 describe 'Базовые объекты javascript', -> 
 
   object = {
-    constructor: -> 
-      this.i = 1
-      console.log 'HERE', this
+    # constructor: -> 
+    #   this.i = 1
+    #   console.log 'HERE', this
+    # TODO move to separated test case
     method2: -> 
       console.log "222", this.i
   }
