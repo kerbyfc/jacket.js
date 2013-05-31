@@ -24,7 +24,7 @@ describe 'Базовые объекты javascript', ->
       w = J(obj)
       
       # TODO separate --- 
-      ww = new w()
+      # ww = new w()
       # ww2 = J('TEST', obj, {ext:true})
       # ww2 = new ww2
       # if ww2.method2?
@@ -50,3 +50,33 @@ describe 'Базовые объекты javascript', ->
             w.should.have.ownProperty 'method'
             w.method.toString().should.not.eq obj.method.toString()
             w.method.should.match Helpers.wrapped_function
+
+
+
+  describe 'Общие принципы', -> 
+
+    describe 'выражение Jacket ( {yes:1} ) ', -> 
+
+      it 'вернет объект новый ', ->
+        obj = 
+            yes: 1
+        j = Jacket(obj)
+        
+        j.should.not.equal obj
+        j.should.be.an.instanceof Object
+
+        
+      it 'имеющий собственное свойство yes = 1', -> 
+        Jacket({yes:1}).should.have.ownProperty 'yes', 1
+
+    describe 'выражение new Jacket ( {yes:1} )', -> 
+
+      before -> 
+        @j = new Jacket({yes:1})
+
+      it 'вернет новую функцию с именем Function[id]', -> 
+        @j.should.be.a 'function'
+        @j.name.should.match /^Function[\d]+/
+        
+
+

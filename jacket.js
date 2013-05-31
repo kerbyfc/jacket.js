@@ -510,18 +510,16 @@
 
       if (typeof this.origin === 'function') {
 
-        console.log(" >>> ", _this.extensions);
-
-        console.log("WRAP FUNCTION", this.fname, {origin:this.origin}, this.extensions);
+        // console.log("WRAP FUNCTION", this.fname, {origin:this.origin}, this.extensions);
 
         this.wrapper = this.wrap('constructor', this.origin, true);
 
-        console.log("FUNC", this.wrapper);
+        // console.log("FUNC", this.wrapper);
 
-        console.log('ORIGIN', this.origin);
+        //console.log('ORIGIN', this.origin);
 
         _.each(this.origin, function(val, key, proto) {
-          console.log(" ++ ", key, val);
+          // console.log(" ++ ", key, val);
           if (_.has(proto, key)) {
             _this.wrapper[key] = _this.wrap(key, val);
           }
@@ -529,7 +527,7 @@
 
         if (this.extensions) {
           _.each(this.extensions, function(val, key, proto) {
-          console.log(" -- ", key, val);
+          // console.log(" -- ", key, val);
           if (_.has(proto, key)) {
             _this.wrapper[key] = _this.wrap(key, val);
           }
@@ -538,7 +536,7 @@
 
       } else {
 
-        console.log("WRAP OBJECT", this.origin, this.extensions);
+        // console.log("WRAP OBJECT", this.origin, this.extensions);
 
         this.wrapper = {};
 
@@ -554,9 +552,9 @@
 
     Wearer.prototype.wrap_class = function() {
 
-      console.log("WRAP CLASS", this.fname, typeof this.origin);
+      // console.log("WRAP CLASS", this.fname, typeof this.origin);
 
-      var _wrapper = this, id = _.uniqueId(this.fname);
+      var _wrapper = this, id = _.uniqueId(this.fname), tmp;
 
       if (typeof this.origin === 'object') {
         tmp = this.origin;
@@ -574,7 +572,7 @@
 
       this._constructor.__super__ = this.origin.prototype;
       
-      console.log(this._constructor.prototype);
+      // console.log(this._constructor.prototype);
 
       Jacket.wearers[id] = {scope: _wrapper, origin: this.origin};
 

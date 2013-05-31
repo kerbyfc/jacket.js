@@ -62,7 +62,6 @@ describe 'Расширение классов на примере Backbone', ->
     it 'вызывает метод constructor из расширения (extend.constructor)', -> 
       extend = BackboneExtend()
       view = new Jacket('MyView', Backbone.View, extend)()
-      console.log view
       view.should.have.ownProperty 'extended'
       extend.spy.callCount.should.eq 1
 
