@@ -16,7 +16,7 @@ describe('Расширение классов на примере Backbone', fun
   describe("выражение new (Jacket ( Backbone.View, extend ))()", function() {
     it('возвращает экземпляр класса Function[n]', function() {
       var view;
-      view = new (Jacket(Backbone.View));
+      view = new Jacket(Backbone.View)();
       return view.constructor.name.should.match(/^Function[\d]+$/i);
     });
     it('расширяет класс объектом extend', function() {

@@ -63,15 +63,32 @@ describe('Базовые объекты javascript', function() {
         }).should.have.ownProperty('yes', 1);
       });
     });
-    return describe('выражение new Jacket ( {yes:1} )', function() {
+    describe('выражение new Jacket ( {yes:1} )', function() {
       before(function() {
         return this.j = new Jacket({
           yes: 1
         });
       });
-      return it('вернет новую функцию с именем Function[id]', function() {
+      return it('вернет новую функцию-инициализатор', function() {
         this.j.should.be.a('function');
-        return this.j.name.should.match(/^Function[\d]+/);
+        return this.j.name.should.eq('');
+      });
+    });
+    return describe('выражение new Jacket ( {yes:1} )("lol")', function() {
+      before(function() {
+        this.j = new Jacket({
+          yes: 1
+        })('lol');
+        this.j = new Jacket({
+          yes: 1
+        })('lol2');
+        return this.j = new Jacket({
+          yes: 1
+        })('lol3');
+      });
+      return it('вернет новый объект класса Object[]', function() {
+        this.j.should.be.a('object');
+        return this.j.constructor.name.should.match(/Object[\d]+/);
       });
     });
   });

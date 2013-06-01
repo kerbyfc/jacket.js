@@ -74,9 +74,28 @@ describe 'Базовые объекты javascript', ->
       before -> 
         @j = new Jacket({yes:1})
 
-      it 'вернет новую функцию с именем Function[id]', -> 
+      it 'вернет новую функцию-инициализатор', -> 
         @j.should.be.a 'function'
-        @j.name.should.match /^Function[\d]+/
+        @j.name.should.eq ''
+
+    describe 'выражение new Jacket ( {yes:1} )("lol")', -> 
+
+      before -> 
+        @j = new Jacket({yes:1})('lol')
+        @j = new Jacket({yes:1})('lol2')
+        @j = new Jacket({yes:1})('lol3')
+
+      it 'вернет новый объект класса Object[]', -> 
+        @j.should.be.a 'object'
+        @j.constructor.name.should.match /Object[\d]+/
+        
+
+
+
+
+
+
+
         
 
 
