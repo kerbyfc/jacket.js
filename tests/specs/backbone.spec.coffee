@@ -13,6 +13,7 @@ describe 'Расширение классов на примере Backbone', ->
 
     it 'возвращает экземпляр класса Function[n]', ->
       view = new Jacket(Backbone.View)()
+      console.log view
       view.constructor.name.should.match /^Function[\d]+$/i
 
     it 'расширяет класс объектом extend', ->
