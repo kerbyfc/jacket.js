@@ -395,10 +395,18 @@
           methods = [];
         }
 
-        if (_.isArray(Jacket.methods)) {
+        if (_.isArray(methods) && _.isArray(Jacket.protected_methods)) {
           _.each(Jacket.protected_methods, function(method) {
             methods.push(method);
           });
+        }
+
+        if (typeof methods === 'string' && methods.match(/^r\/.*\/([igm]*)?$/) !== null && (fIndex = methods.lastIndexOf('/'))) {
+          try {
+            methods = new RegExp(methods.substr(2, fIndex - 3), methods.substring(fIndex + 1));
+          } catch (e) {
+            methods = [];
+          }
         }
 
         if (typeof callback === "undefined") {
@@ -432,7 +440,7 @@
     getObjectName: function(obj, custom) {
       var name = (typeof custom === 'string' && custom) ? custom : obj.name;
       if (!name) {
-        name = _.uniqueId(obj.constructor.name || this.capitalize(typeof(obj)));
+        name = _.uniqueId(obj.name || 'jacket');//this.capitalize(typeof(obj)));
       }
       return name;
     },
@@ -450,9 +458,7 @@
 
   Jacket.Wearer = (function() {
 
-    Wearer.members = [];
-
-    function Wearer(origin, extentions, callback, protected_methods, fname, instantiatable, args) {
+    function Wearer(origin, extentions, callback, methods, fname, instantiatable, args) {
 
       var key, type = typeof origin,
         _this = this;
@@ -467,14 +473,13 @@
         this.wrap = this.bind(this.wrap, this);
 
         this.callback = callback;
-        this.protect(protected_methods);
-      
+
+        this.methods = (methods instanceof RegExp) ? methods : ["__super__", "constructor"].concat(methods)
         
         /*
           будет создан новый класс
         */
-        if (args // если инстанциируем через new            
-          || fname // или если передано имя нового класса
+        if (args // если инстанциируем через new
             || (_.keys(this.origin.prototype || Object.getPrototypeOf(this.origin)).length) // или если у объекта есть свойства прототипа
               || origin.name // или если объект имеет name
                 || _.has(origin, 'constructor') // или если объект имеет constructor
@@ -519,7 +524,7 @@
 
         // console.log("WRAP FUNCTION", this.fname, {origin:this.origin}, this.extensions);
 
-        this.wrapper = this.wrap('constructor', this.origin, true);
+        this.wrapper = this.wrap(this.origin, true);
 
         // console.log("FUNC", this.wrapper);
 
@@ -586,12 +591,12 @@
       _class = [
 
         'J.wearers["', id, '"].wrapper = ', ( this.fname !== this.cname ? this.fname + ' = ' : ''), '(function(jacket, obj, constructor, extentions, args) {',
-          'console.log(arguments);', 
+          // 'console.log(arguments);', 
         '\n  jacket.extend(', this.cname, ', obj);',
         '\n  ', this.cname, '.name = "', this.cname, '";',
         '\n  function ', this.cname, '() {', 
         ( this.extentions ?  '\n    jacket.do_wraps(extentions, this);' : ''),
-        '\n     this.__super__ = constructor.__super__;',
+        // '\n     this.__super__ = constructor.__super__;',
         '\n     var result = constructor.apply(this, Array.prototype.slice.call(', Jacket.Helpers.isArguments(args) ? 'args' : 'arguments', '));',
         '\n     jacket.do_wraps(this);',
         '\n     return result;',
@@ -603,7 +608,7 @@
 
       wrapper.push(this.construct, this.extentions, args);
 
-      console.log(wrapper);
+      // console.log(wrapper);
 
       for (var i = 0, last = wrapper.length-1; i <= last; i++) {
         _class.push('J.wearers["' + id + '"][' + i + ']' + ((i < last) ? ', ' : ''));
@@ -611,7 +616,7 @@
 
       _class.push(');');
 
-      console.log(_class.join(''));
+      // console.log(_class.join(''));
 
       globalEval(_class.join(''));
 
@@ -630,19 +635,10 @@
       target = target || origin;
       for (var key in origin) {
           if (_.has(origin, key)) {
-            console.log(" > ", key);
+            // console.log(" > ", key);
             target[key] = _this.wrap( key, origin[key] );
           }
         }
-    };
-
-    Wearer.prototype.protect = function(protected_methods) {
-      var _this = this;
-      this.protected_methods = {"__super__": 1, "constructor": 1};
-      _.each(protected_methods, function(prop) {
-        _this.protected_methods[prop] = 1;
-      });
-      return this.protected_methods;
     };
   
     Wearer.prototype.extend = function(child, parent) {
@@ -669,37 +665,120 @@
 
     };
 
+    /*
+try
+
+    callback = (call) -> 
+        console.log "> #{call.caller}.#{call.method}(", call.args, ")", if call.err? then "throws #{call.err.msg}" else "= #{call.result}"
+        
+    J.handler = (err, msg) ->
+        return true unless msg.match(/^FATAL/i)?
+
+    A = J class A
+    
+        constructor: -> 
+            console.log 'A.constructor'
+            @on 'fetch', @render
+            
+        _method: -> 
+            console.log 'A._method'
+            @trigger '_method'
+            false
+            
+        render: (res) => 
+            console.log 'A.render'
+            @trigger 'render', res
+            true
+            
+        $fetch: -> 
+            $.get('/tags').always (res) ->
+                @trigger 'fetch', res
+            
+    , Backbone.Events # extend with backbone events
+    , ['on', 'bind'] # protect on, bind, etc
+    , callback # callback for all (unprotected methods)
+    
+    B = J class B extends A
+    
+        constructor: -> 
+            super
+            console.log 'B.constructor'
+            
+            @on 'extentionMethod', -> 
+                error2
+                
+            @extentionMethod()
+            
+            @on '_method', J 'FATAL (in _method event handler)', -> 
+                error3
+            , (call) -> 
+                if call.err?
+                    console.log 'handle', call.err.msg, '->', call.err.obj
+                
+            @_method()
+                
+        itMyFault: -> 
+            error1
+            
+    , # extension (mixin)
+        extentionMethod: -> 
+            console.log 'B.extentionMethod'
+            @itMyFault()
+            @trigger 'extentionMethod'
+            
+            
+    , callback # callback for all functions
+            
+    b = new B
+    console.log "That's it!"
+
+catch e
+    console.error e.message
+    
+
+
+    */
+
     Wearer.prototype.wrap = function(prop, value, force) {
       
       var _this = this;
 
       if (typeof prop === 'function') {
         value = prop;
-        prop = _.uniqueId('anonymous');
+        prop = false;
       }
 
       // console.log('wrap', typeof this.origin, _this.fname + '.' + prop, '[', typeof value, ']');
 
-      if (force || (typeof value === 'function' && !_.has(value, "wrapped") && !_.has(this.protected_methods, prop) )) {
-        
+      if (typeof value === 'function' && !_.has(value, "wrapped") && (force || ( _.isArray(this.methods) && _.indexOf(this.methods, prop) < 0) || (this.methods instanceof RegExp && this.methods.test(prop)) )) {
+      
         var _fn_wrapper = function() {
 
-          var log = {scope: _this.fname, method: prop, args: arguments, time: new Date().getTime()};
+          var log = {caller: _this.fname, method: prop, args: arguments, time: new Date().getTime()};
 
           try {
             
             /* apply origin class method... */
             log.result = value.apply(this, arguments);
 
-            if (typeof _this.callback === "function") {
-              _this.callback((_this.fname || _this.origin), prop, arguments, log.result);
+          } catch (e) {
+            
+            log.err = {
+              obj: e,
+              msg: _this.fname + ( prop ? "." + prop : '' ) + ( log.args.length ? (  '( ' + ( (typeof log.args[0] === 'string') ? '"' + log.args[0] + '"' : typeof log.args[0] ) + ", ... )") : '' ) + ' : '
             }
 
-            Jacket.callstack.push(log);
+            Jacket.handle(e, log.err.msg);
+            
+            log.err.msg += e.message;
 
-          } catch (e) {
-            Jacket.handle(e, _this.fname + "." + prop + " : ");
           }
+
+          if (typeof _this.callback === "function") {
+            _this.callback(log);
+          }
+
+          Jacket.callstack.push(log);
 
           return log.result;
 
@@ -742,8 +821,9 @@
     }
   };
 
-  var nativeForEach = Object.getPrototypeOf([]).forEach;
-  var idCounter = 0;
+  var nativeForEach = Object.getPrototypeOf([]).forEach,
+      nativeIndexOf = Object.getPrototypeOf([]).indexOf,
+      idCounter = 0;
 
   // используются некоторые методы underscore
   if (typeof root._ === "undefined") {
@@ -771,6 +851,22 @@
 
       isArray: function(obj) {
         return toString.call(obj) == "[object Array]";
+      },
+
+      indexOf: function(array, item, isSorted) {
+        if (array == null) return -1;
+        var i = 0, l = array.length;
+        if (isSorted) {
+          if (typeof isSorted == 'number') {
+            i = (isSorted < 0 ? Math.max(0, l + isSorted) : isSorted);
+          } else {
+            i = _.sortedIndex(array, item);
+            return array[i] === item ? i : -1;
+          }
+        }
+        if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item, isSorted);
+        for (; i < l; i++) if (array[i] === item) return i;
+        return -1;
       },
 
       has: function(obj, key) {
