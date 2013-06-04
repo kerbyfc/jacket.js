@@ -453,8 +453,13 @@
 
   }
 
-  Jacket.logEvent(window, "load");
-  Jacket.logEvent(document.body, "click");
+  if (!Jacket.is_node) {
+    Jacket.logEvent(root, "load");
+    root.onload = function() {
+      Jacket.logEvent(document.body, "click");
+    }
+  }
+  
 
   Jacket.Wearer = (function() {
 
