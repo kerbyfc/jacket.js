@@ -85,9 +85,9 @@ describe 'Базовые объекты javascript', ->
         @j = new Jacket({yes:1})('lol2')
         @j = new Jacket({yes:1})('lol3')
 
-      it 'вернет новый объект класса Object[]', -> 
+      it 'вернет новый класс, с именем jacket[n]', -> 
         @j.should.be.a 'object'
-        @j.constructor.name.should.match /Object[\d]+/
+        @j.constructor.name.should.match /jacket[\d]+/
         
 
 

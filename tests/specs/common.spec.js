@@ -87,9 +87,9 @@
             yes: 1
           })('lol3');
         });
-        return it('вернет новый объект класса Object[]', function() {
+        return it('вернет новый класс, с именем jacket[n]', function() {
           this.j.should.be.a('object');
-          return this.j.constructor.name.should.match(/Object[\d]+/);
+          return this.j.constructor.name.should.match(/jacket[\d]+/);
         });
       });
     });
