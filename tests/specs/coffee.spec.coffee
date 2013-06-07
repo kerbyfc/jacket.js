@@ -29,7 +29,6 @@ describe 'CoffeeScript classes', ->
 
         it 'should return new instance of wrapped class', -> 
           w = new W()
-          console.log '<><><>', w
           w.should.be.instanceOf W
           w.id.should.eq i+1
 

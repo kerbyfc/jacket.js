@@ -81,7 +81,6 @@
         var extend, view;
         extend = BackboneExtend();
         view = new Jacket('MyView', Backbone.View, extend)();
-        console.log(view);
         view.should.have.ownProperty('extended');
         return extend.spy.callCount.should.eq(1);
       });

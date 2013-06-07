@@ -25,11 +25,11 @@ describe 'Базовые объекты javascript', ->
       
       # TODO separate --- 
       # ww = new w()
-      # # ww2 = J('TEST', obj, {ext:true})
-      # # # ww2 = new ww2
-      # # # if ww2.method2?
-      # # #   ww2.method2()
-      # # # console.log ww2
+      # ww2 = J('TEST', obj, {ext:true})
+      # ww2 = new ww2
+      # if ww2.method2?
+      #   ww2.method2()
+      # console.log ww2
       # TODO separate --- 
 
       describe 'выражение Jacket ( ' + name + ' )', -> 
@@ -50,3 +50,52 @@ describe 'Базовые объекты javascript', ->
             w.should.have.ownProperty 'method'
             w.method.toString().should.not.eq obj.method.toString()
             w.method.should.match Helpers.wrapped_function
+
+
+
+  describe 'Общие принципы', -> 
+
+    describe 'выражение Jacket ( {yes:1} ) ', -> 
+
+      it 'вернет объект новый ', ->
+        obj = 
+            yes: 1
+        j = Jacket(obj)
+        
+        j.should.not.equal obj
+        j.should.be.an.instanceof Object
+
+        
+      it 'имеющий собственное свойство yes = 1', -> 
+        Jacket({yes:1}).should.have.ownProperty 'yes', 1
+
+    describe 'выражение new Jacket ( {yes:1} )', -> 
+
+      before -> 
+        @j = new Jacket({yes:1})
+
+      it 'вернет новую функцию-инициализатор', -> 
+        @j.should.be.a 'function'
+        @j.name.should.eq ''
+
+    describe 'выражение new Jacket ( {yes:1} )("lol")', -> 
+
+      before -> 
+        @j = new Jacket({yes:1})('lol')
+        @j = new Jacket({yes:1})('lol2')
+        @j = new Jacket({yes:1})('lol3')
+
+      it 'вернет новый объект класса Object[]', -> 
+        @j.should.be.a 'object'
+        @j.constructor.name.should.match /Object[\d]+/
+        
+
+
+
+
+
+
+
+        
+
+
