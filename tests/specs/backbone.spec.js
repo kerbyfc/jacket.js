@@ -7,7 +7,7 @@
       spy = sinon.spy();
       return {
         constructor: function() {
-          this.__super__.constructor.apply(this, arguments);
+          this.constructor.__super__.constructor.apply(this, arguments);
           return spy();
         },
         extended: true,
@@ -18,7 +18,7 @@
       it('возвращает экземпляр класса Function[n]', function() {
         var view;
         view = new (Jacket(Backbone.View));
-        return view.constructor.name.should.match(/^Function[\d]+$/i);
+        return view.constructor.name.should.match(/^jacket[\d]+$/i);
       });
       it('расширяет класс объектом extend', function() {
         var view;
@@ -39,10 +39,10 @@
       });
     });
     describe("выражение new Jacket ( Backbone.View, extend )()", function() {
-      it('возвращает экземпляр класса Function[n]', function() {
+      it('возвращает экземпляр класса jacket[n]', function() {
         var view;
         view = new Jacket(Backbone.View)();
-        return view.constructor.name.should.match(/^Function[\d]+$/i);
+        return view.constructor.name.should.match(/^jacket[\d]+$/i);
       });
       it('расширяет класс объектом extend', function() {
         var view;

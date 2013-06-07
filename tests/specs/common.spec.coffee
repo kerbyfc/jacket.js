@@ -24,12 +24,12 @@ describe 'Базовые объекты javascript', ->
       w = J(obj)
       
       # TODO separate --- 
-      ww = new w()
-      ww2 = J('TEST', obj, {ext:true})
-      ww2 = new ww2
-      if ww2.method2?
-        ww2.method2()
-      console.log ww2
+      # ww = new w()
+      # # ww2 = J('TEST', obj, {ext:true})
+      # # # ww2 = new ww2
+      # # # if ww2.method2?
+      # # #   ww2.method2()
+      # # # console.log ww2
       # TODO separate --- 
 
       describe 'выражение Jacket ( ' + name + ' )', -> 

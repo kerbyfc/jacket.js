@@ -4,7 +4,7 @@ describe 'Расширение классов на примере Backbone', ->
     spy = sinon.spy()
     return {
       constructor: ->
-        this.__super__.constructor.apply(this, arguments); spy();
+        @constructor.__super__.constructor.apply(this, arguments); spy();
       extended: true
       spy: spy
     }
@@ -13,7 +13,7 @@ describe 'Расширение классов на примере Backbone', ->
 
     it 'возвращает экземпляр класса Function[n]', ->
       view = new (Jacket(Backbone.View))
-      view.constructor.name.should.match /^Function[\d]+$/i
+      view.constructor.name.should.match /^jacket[\d]+$/i
 
     it 'расширяет класс объектом extend', ->
       view = new (Jacket Backbone.View, BackboneExtend())
@@ -31,9 +31,9 @@ describe 'Расширение классов на примере Backbone', ->
 
   describe "выражение new Jacket ( Backbone.View, extend )()", -> 
 
-    it 'возвращает экземпляр класса Function[n]', ->
+    it 'возвращает экземпляр класса jacket[n]', ->
       view = new Jacket(Backbone.View)()
-      view.constructor.name.should.match /^Function[\d]+$/i
+      view.constructor.name.should.match /^jacket[\d]+$/i
 
     it 'расширяет класс объектом extend', ->
       view = new Jacket(Backbone.View, BackboneExtend())()
