@@ -1,6 +1,8 @@
 Jacket.js
 =========
 
+    Sorry, development was temporarily suspended. It will be resumed in November 2013th
+
   **Let's dress up your code with <i>Jackets</i>**
 
 1. [Conception](#1-conception)
