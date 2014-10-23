@@ -1,7 +1,7 @@
 Jacket.js
 =========
 
-    Sorry, development was temporarily suspended. It will be resumed in November 2013th
+    Sorry, development was temporarily suspended
 
   **Let's dress up your code with <i>Jackets</i>**
 
